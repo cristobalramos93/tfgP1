@@ -63,7 +63,6 @@ def login(request):
     return render(request, "login.html", {'form': form})
 
 def logout(request):
-    print('Te has Salido')
     do_logout(request)
 
     # Redireccionamos a la portada
