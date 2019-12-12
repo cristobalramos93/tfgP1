@@ -16,6 +16,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'TiendaOnline.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["C:/Users/crist/Desktop/myproject/TiendaOnline/gestionPedidos/plantillas"],
+        'DIRS': [BASE_DIR + "/gestionPedidos/plantillas"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -6,72 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
-
-class AuthGroup(models.Model):
-    name = models.CharField(unique=True, max_length=150)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_group'
-
-
-class AuthGroupPermissions(models.Model):
-    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
-    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_group_permissions'
-        unique_together = (('group', 'permission'),)
-
-
-class AuthPermission(models.Model):
-    name = models.CharField(max_length=255)
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
-    codename = models.CharField(max_length=100)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_permission'
-        unique_together = (('content_type', 'codename'),)
-
-
-class AuthUser(models.Model):
-    password = models.CharField(max_length=128)
-    last_login = models.DateTimeField(blank=True, null=True)
-    is_superuser = models.IntegerField()
-    username = models.CharField(unique=True, max_length=150)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=150)
-    email = models.CharField(max_length=254)
-    is_staff = models.IntegerField()
-    is_active = models.IntegerField()
-    date_joined = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'auth_user'
-
-
-class AuthUserGroups(models.Model):
-    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
-    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_user_groups'
-        unique_together = (('user', 'group'),)
-
-
-class AuthUserUserPermissions(models.Model):
-    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
-    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'auth_user_user_permissions'
-        unique_together = (('user', 'permission'),)
+from django.contrib.auth.models import User
 
 
 class CasosFormacion(models.Model):
@@ -98,7 +33,7 @@ class CasosFormacion(models.Model):
     tomas_extras = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'casos_formacion'
 
 
@@ -126,7 +61,7 @@ class CasosSeguimiento(models.Model):
     h14 = models.CharField(max_length=45, blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'casos_seguimiento'
 
 
@@ -135,7 +70,7 @@ class DestinoDoc(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'destino_doc'
 
 
@@ -148,52 +83,9 @@ class Dietas(models.Model):
     raciones = models.FloatField(db_column='RACIONES', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'dietas'
 
-
-class DjangoAdminLog(models.Model):
-    action_time = models.DateTimeField()
-    object_id = models.TextField(blank=True, null=True)
-    object_repr = models.CharField(max_length=200)
-    action_flag = models.PositiveSmallIntegerField()
-    change_message = models.TextField()
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
-    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'django_admin_log'
-
-
-class DjangoContentType(models.Model):
-    app_label = models.CharField(max_length=100)
-    model = models.CharField(max_length=100)
-
-    class Meta:
-        managed = False
-        db_table = 'django_content_type'
-        unique_together = (('app_label', 'model'),)
-
-
-class DjangoMigrations(models.Model):
-    app = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    applied = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'django_migrations'
-
-
-class DjangoSession(models.Model):
-    session_key = models.CharField(primary_key=True, max_length=40)
-    session_data = models.TextField()
-    expire_date = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'django_session'
 
 
 class Documentaciones(models.Model):
@@ -208,7 +100,7 @@ class Documentaciones(models.Model):
     filetype = models.CharField(db_column='FILETYPE', max_length=64, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'documentaciones'
 
 
@@ -220,7 +112,7 @@ class Ejercicios(models.Model):
     type = models.IntegerField(db_column='TYPE', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'ejercicios'
 
 
@@ -231,7 +123,7 @@ class Ficherosexportados(models.Model):
     iduser = models.BigIntegerField(db_column='IDUSER', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'ficherosexportados'
 
 
@@ -241,7 +133,7 @@ class GestionpedidosArticulos(models.Model):
     precio = models.IntegerField()
 
     class Meta:
-        managed = False
+        
         db_table = 'gestionpedidos_articulos'
 
 
@@ -252,7 +144,7 @@ class GestionpedidosClientes(models.Model):
     telefono = models.CharField(max_length=7)
 
     class Meta:
-        managed = False
+        
         db_table = 'gestionpedidos_clientes'
 
 
@@ -262,7 +154,7 @@ class GestionpedidosPedidos(models.Model):
     entregado = models.IntegerField()
 
     class Meta:
-        managed = False
+        
         db_table = 'gestionpedidos_pedidos'
 
 
@@ -275,7 +167,7 @@ class Glucemias(models.Model):
     value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'glucemias'
 
 
@@ -288,7 +180,7 @@ class Insulinas(models.Model):
     value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'insulinas'
 
 
@@ -300,7 +192,7 @@ class MensajesUsuario(models.Model):
     userid = models.BigIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'mensajes_usuario'
 
 
@@ -311,7 +203,7 @@ class Modelos(models.Model):
     idpaciente = models.IntegerField(db_column='IDPACIENTE')  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'modelos'
 
 
@@ -322,7 +214,7 @@ class Momentos(models.Model):
     hourto = models.SmallIntegerField(db_column='HOURTO', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'momentos'
 
 
@@ -331,7 +223,7 @@ class NivelEje(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'nivel_eje'
 
 
@@ -342,7 +234,7 @@ class Pesos(models.Model):
     peso = models.FloatField(db_column='PESO', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'pesos'
 
 
@@ -357,7 +249,7 @@ class Pruebas(models.Model):
     filetype = models.CharField(db_column='FILETYPE', max_length=64, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'pruebas'
 
 
@@ -367,7 +259,7 @@ class Recomendaciones(models.Model):
     texto = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'recomendaciones'
 
 
@@ -376,7 +268,7 @@ class TipoEje(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'tipo_eje'
 
 
@@ -385,7 +277,7 @@ class TipoIns(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'tipo_ins'
 
 
@@ -394,7 +286,7 @@ class TipoPru(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'tipo_pru'
 
 
@@ -428,5 +320,54 @@ class Usuarios(models.Model):
     hipogluc = models.IntegerField(db_column='HIPOGLUC', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        
         db_table = 'usuarios'
+
+class Centro_medico(models.Model):
+    name = models.CharField(max_length=250)
+    postal = models.IntegerField(max_length=250, blank = True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'centro_medico'
+        
+
+class Medico(User):
+    board_number = models.CharField(max_length=250)
+    medical_center = models.ForeignKey(Centro_medico, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.username 
+
+    class Meta:
+        db_table = 'medico'
+
+class Tratamiento(models.Model):
+    code = models.CharField(max_length=250)
+    name = models.CharField(max_length=250)
+
+    def __str__(self):
+        return self.code 
+
+    class Meta:
+        db_table = 'tratamiento'
+
+class Paciente(User):
+    TYPES = (
+        ('Tipo_1', 'Diabetes tipo 1'),
+        ('Tipo_2', 'Diabetes tipo 2'),
+        ('Otro', 'Diabetes de otro tipo')
+    )
+    birth_date = models.DateField()
+    diabetes_type = models.CharField(max_length=10, choices=TYPES)
+    treatment = models.ForeignKey(Tratamiento, on_delete=models.PROTECT)
+    start_date = models.DateField(null = True, blank = True)
+    doctor_id = models.ForeignKey(Medico, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.username 
+
+    class Meta:
+        db_table = 'paciente'

@@ -25,7 +25,7 @@ def register(request):
         password = request.POST['password']
         email = request.POST['email']
         user = User.objects.create_user(username=username,first_name=first_name,password=password,email = email)
-        user.save();
+        user.save()
         return redirect("/")
     else:
         return render(request,'register.html')
