@@ -7,7 +7,7 @@ from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from django.contrib.auth.models import User
-from gestionPedidos.models import Paciente,Tratamiento
+from gestionPedidos.models import Paciente,Tratamiento, Medico
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -21,6 +21,7 @@ def welcome(request):
 
 
 def register(request):
+
     obj = Tratamiento.objects.all()
     tipo_diabetes = Paciente.TYPES
     if request.method == 'POST':
@@ -36,17 +37,16 @@ def register(request):
         birth_date = request.POST['birth_date']
         #bir = birth_date.isoformat()
         diabetes_type = request.POST['diabetes_type']
-        doctor_id_id = request.POST['doctor_id_id']
         treatment_id = request.POST['treatment_id']
-        id_treatment = Tratamiento.objects.get(code = treatment_id)
-        id_treatment2 = id_treatment.id
+        treatment_id = Tratamiento.objects.get(code = treatment_id)
+        treatment_id = treatment_id.id
         p = Paciente(
             password = make_password(password),
             username = email,
            # birth_date = birth_date,
             diabetes_type = diabetes_type,
-            treatment_id = id_treatment2,
-            doctor_id_id = 12
+            treatment_id = treatment_id,
+            doctor_id_id = request.user.medico.user_ptr_id
         )
         p.save()
         return redirect("/")
