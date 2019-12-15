@@ -45,7 +45,7 @@ def register(request):
             username = email,
            # birth_date = birth_date,
             diabetes_type = diabetes_type,
-            treatment_id = treatment_id,
+            treatment_id = id_treatment2,
             doctor_id_id = 12
         )
         p.save()
