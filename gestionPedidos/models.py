@@ -360,9 +360,9 @@ class Paciente(User):
         ('Tipo_2', 'Diabetes tipo 2'),
         ('Otro', 'Diabetes de otro tipo')
     )
-    birth_date = models.DateField()
+    birth_date = models.DateField(null = True)
     diabetes_type = models.CharField(max_length=10, choices=TYPES)
-    treatment = models.ForeignKey(Tratamiento, on_delete=models.PROTECT)
+    treatment = models.ForeignKey(Tratamiento, on_delete=models.PROTECT,null = True)
     start_date = models.DateField(null = True, blank = True)
     doctor_id = models.ForeignKey(Medico, on_delete=models.PROTECT)
 
@@ -371,3 +371,4 @@ class Paciente(User):
 
     class Meta:
         db_table = 'paciente'
+

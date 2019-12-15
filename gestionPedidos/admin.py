@@ -16,8 +16,6 @@ class UserCreationForm(forms.ModelForm):
     #fields, plus a repeated password.
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
-    board_number = forms.CharField(label = 'Numero de colegiado')
-    medical_center = forms.ModelChoiceField(label='Centro Medico', queryset = Centro_medico.objects.all())
 
     class Meta:
         model = Medico

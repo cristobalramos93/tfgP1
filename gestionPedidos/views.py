@@ -7,7 +7,9 @@ from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from django.contrib.auth.models import User
-
+from gestionPedidos.models import Paciente,Tratamiento
+from datetime import datetime
+from django.shortcuts import render
 
 
 def welcome(request):
@@ -19,16 +21,41 @@ def welcome(request):
 
 
 def register(request):
+    obj = Tratamiento.objects.all()
+    tipo_diabetes = Paciente.TYPES
     if request.method == 'POST':
-        username = request.POST['username']
-        first_name = request.POST['first_name']
+
+        """"user = {{request.user.id}}
+        obj = Paciente.objects.get(user)
+        id_doctor = obj.doctor_id
+        doctor_id_id = id_doctor
+        buscar el id del medico que da de alta(sin comprobar)
+        """""
         password = request.POST['password']
         email = request.POST['email']
-        user = User.objects.create_user(username=username,first_name=first_name,password=password,email = email)
-        user.save()
+        birth_date = request.POST['birth_date']
+        #bir = birth_date.isoformat()
+        diabetes_type = request.POST['diabetes_type']
+        doctor_id_id = request.POST['doctor_id_id']
+        if diabetes_type == 1:
+            diabetes_type = "Tipo_1"
+            print (diabetes_type)
+        else:
+            print("caca")
+        #treatment_id = request.POST['treatment_id']
+        p = Paciente(
+            password = password,
+            username = email,
+           # birth_date = birth_date,
+            diabetes_type = diabetes_type,
+            treatment_id = 1,
+            doctor_id_id = 12
+        )
+        p.save()
         return redirect("/")
     else:
-        return render(request,'register.html')
+        return render(request,'register.html',{'obj': obj, 'tipo_diabetes' : tipo_diabetes})
+
 
 def login(request):
     # Creamos el formulario de autenticación vacío

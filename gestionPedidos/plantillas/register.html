@@ -37,20 +37,45 @@
                     <h2 class="title">Registration Info</h2>
                     <form  method="POST">
                             {% csrf_token %}
-                        <div class="input-group">
-                            <input class="input--style-1" type="text" placeholder="NAME" name="username">
-                        </div>
-                        <div class="input-group">
-                            <input class="input--style-1" type="text" placeholder="APELLIDOS" name="first_name">
-                        </div>
-                                                <div class="row row-space">
+                        <div class="row row-space">
                             <div class="col-2">
                                 <div class="input-group">
                                     <input class="input--style-1" type="email" placeholder="EMAIL" name="email">
                                 </div>
                             </div>
                         </div>
-
+                        <div class="input-group">
+                            <input class="input--style-1" type="text" placeholder="PESO DEL PACIENTE" name="weight">
+                        </div>
+                        <div class="input-group">
+                            <input class="input--style-1" type="text" placeholder="NÚMERO DE COLEGIADO DEL MÉDICO" name="doctor_id_id">
+                        </div>
+                        <div class="input-group">
+                                    <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE NACIMIENTO" name="birth_date">
+                                    <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
+                        </div>
+                        <div class="input-group">
+                            <div class="rs-select2 js-select-simple select--no-search">
+                                <select name="diabetes_type">
+                                    <option disabled="disabled" selected="selected">TIPO DE DIABETES</option>
+                                    {% for objeto in tipo_diabetes %}
+    	                                <option>{{objeto}}<option>
+                                    {% endfor %}
+                                </select>
+                                <div class="select-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div class="rs-select2 js-select-simple select--no-search">
+                                <select name="treatment_id">
+                                    <option disabled="disabled" selected="selected">TIPO DE TRATAMIENTO</option>
+                                    {% for objeto in obj %}
+    	                                <option>{{objeto.code}}<option>
+                                    {% endfor %}
+                                </select>
+                                <div class="select-dropdown"></div>
+                            </div>
+                        </div>
                         <div class="row row-space">
                             <div class="col-2">
                                 <div class="input-group">
