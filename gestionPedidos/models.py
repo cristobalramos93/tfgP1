@@ -325,7 +325,6 @@ class Usuarios(models.Model):
 
 class Centro_medico(models.Model):
     name = models.CharField(max_length=250)
-    postal = models.IntegerField(max_length=250, blank = True, null=True)
 
     def __str__(self):
         return self.name
@@ -362,7 +361,7 @@ class Paciente(User):
     )
     birth_date = models.DateField(null = True)
     diabetes_type = models.CharField(max_length=10, choices=TYPES)
-    treatment = models.ForeignKey(Tratamiento, on_delete=models.PROTECT,null = True)
+    treatment = models.ForeignKey(Tratamiento, on_delete=models.PROTECT)
     start_date = models.DateField(null = True, blank = True)
     doctor_id = models.ForeignKey(Medico, on_delete=models.PROTECT)
 

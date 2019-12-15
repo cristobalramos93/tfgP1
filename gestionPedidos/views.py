@@ -37,13 +37,15 @@ def register(request):
         #bir = birth_date.isoformat()
         diabetes_type = request.POST['diabetes_type']
         doctor_id_id = request.POST['doctor_id_id']
-        #treatment_id = request.POST['treatment_id']
+        treatment_id = request.POST['treatment_id']
+        id_treatment = Tratamiento.objects.get(code = treatment_id)
+        id_treatment2 = id_treatment.id
         p = Paciente(
             password = make_password(password),
             username = email,
            # birth_date = birth_date,
             diabetes_type = diabetes_type,
-            treatment_id = 1,
+            treatment_id = treatment_id,
             doctor_id_id = 12
         )
         p.save()
