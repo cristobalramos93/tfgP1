@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from gestionPedidos.models import Paciente,Tratamiento
 from datetime import datetime
 from django.shortcuts import render
-
+from django.contrib.auth.hashers import make_password
 
 def welcome(request):
     # Si estamos identificados devolvemos la portada
@@ -37,14 +37,9 @@ def register(request):
         #bir = birth_date.isoformat()
         diabetes_type = request.POST['diabetes_type']
         doctor_id_id = request.POST['doctor_id_id']
-        if diabetes_type == 1:
-            diabetes_type = "Tipo_1"
-            print (diabetes_type)
-        else:
-            print("caca")
         #treatment_id = request.POST['treatment_id']
         p = Paciente(
-            password = password,
+            password = make_password(password),
             username = email,
            # birth_date = birth_date,
             diabetes_type = diabetes_type,
