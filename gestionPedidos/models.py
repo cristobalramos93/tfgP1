@@ -355,8 +355,8 @@ class Tratamiento(models.Model):
 
 class Paciente(User):
     TYPES = (
-        ('Tipo_1', 'Diabetes de tipo 1'),
-        ('Tipo_2', 'Diabetes de tipo 2'),
+        ('Tipo 1', 'Diabetes de tipo 1'),
+        ('Tipo 2', 'Diabetes de tipo 2'),
         ('Otro', 'Diabetes de otro tipo')
     )
     birth_date = models.DateField(null = True)

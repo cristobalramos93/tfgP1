@@ -13,7 +13,7 @@
     <meta name="keywords" content="Colorlib Templates">
 
     <!-- Title Page-->
-    <title>Au Register Forms by Colorlib</title>
+    <title>Registro de Paciente</title>
 
     <!-- Icons font CSS-->
     <link href="{% static 'vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet" media="all">
@@ -40,23 +40,23 @@
                         <div class="row row-space">
                             <div class="col-2">
                                 <div class="input-group">
-                                    <input class="input--style-1" type="email" placeholder="EMAIL" name="email">
+                                    <input class="input--style-1" type="email" placeholder="CORREO ELECTRÓNICO*" name="email">
                                 </div>
                             </div>
                         </div>
                         <div class="input-group">
-                            <input class="input--style-1" type="text" placeholder="PESO DEL PACIENTE" name="weight">
+                            <input class="input--style-1" type="number" placeholder="PESO DEL PACIENTE" name="weight">
                         </div>
                         <div class="input-group">
-                                    <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE NACIMIENTO" name="birth_date">
+                                    <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE NACIMIENTO*" name="birth_date">
                                     <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
                         </div>
                         <div class="input-group">
                             <div class="rs-select2 js-select-simple select--no-search">
                                 <select name="diabetes_type">
-                                    <option disabled="disabled" selected="selected">TIPO DE DIABETES</option>
+                                    <option disabled="disabled" selected="selected">TIPO DE DIABETES*</option>
                                     {% for objeto in tipo_diabetes %}
-    	                                <option>{{objeto.1}}<option>
+    	                                <option>{{objeto.0}}<option>
                                     {% endfor %}
                                 </select>
                                 <div class="select-dropdown"></div>
@@ -65,7 +65,7 @@
                         <div class="input-group">
                             <div class="rs-select2 js-select-simple select--no-search">
                                 <select name="treatment_id">
-                                    <option disabled="disabled" selected="selected">TIPO DE TRATAMIENTO</option>
+                                    <option disabled="disabled" selected="selected">TIPO DE TRATAMIENTO*</option>
                                     {% for objeto in obj %}
     	                                <option>{{objeto.code}}<option>
                                     {% endfor %}
@@ -76,7 +76,14 @@
                         <div class="row row-space">
                             <div class="col-2">
                                 <div class="input-group">
-                                    <input class="input--style-1" type="password" placeholder="PASSWORD" name="password">
+                                    <input class="input--style-1" type="password" placeholder="CONTRASEÑA*" name="password1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group">
+                                    <input class="input--style-1" type="password" placeholder="REPETIR CONTRASEÑA*" name="password2">
                                 </div>
                             </div>
                         </div>
