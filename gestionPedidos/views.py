@@ -20,6 +20,8 @@ def welcome(request):
     # En otro caso redireccionamos al login
     return redirect('/login')
 
+def prueba(request):
+    return render(request,"pruebaBo.html")
 
 def register(request):
 
@@ -37,7 +39,8 @@ def register(request):
         password2 = request.POST['password2']
         email = request.POST['email']
         birth_date = request.POST['birth_date']
-        #bir = birth_date.isoformat()
+        format_str = '%d/%m/%Y'
+        birth_date = datetime.strptime(birth_date, format_str)
         diabetes_type = request.POST['diabetes_type']
         treatment_id = request.POST['treatment_id']
         treatment_id = Tratamiento.objects.get(code = treatment_id)
@@ -46,10 +49,11 @@ def register(request):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
 
+
         paciente = Paciente(
             password = make_password(password1),
             username = email,
-           # birth_date = birth_date,
+            birth_date = birth_date,
             diabetes_type = diabetes_type,
             treatment_id = treatment_id,
             doctor_id_id = request.user.medico.user_ptr_id
