@@ -20,7 +20,9 @@ from gestionPedidos import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.welcome),
-    path('register/', views.register),
     path('login/', views.login),
     path('logout/', views.logout),
+    path('prueba/', views.prueba),
+    path('register/', views.register),
+
 ]
