@@ -52,8 +52,12 @@
                                     <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
                         </div>
                         <div class="input-group">
+                            <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE COMIENZO*" name="start_date"required>
+                            <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
+                        </div>
+                        <div class="input-group">
                             <div class="rs-select2 js-select-simple select--no-search">
-                                <select name="diabetes_type">
+                                <select name="diabetes_type" required>
                                     <option disabled="disabled" selected="selected">TIPO DE DIABETES*</option>
                                     {% for objeto in tipo_diabetes %}
     	                                <option>{{objeto.0}}<option>
@@ -64,7 +68,7 @@
                         </div>
                         <div class="input-group">
                             <div class="rs-select2 js-select-simple select--no-search">
-                                <select name="treatment_id">
+                                <select name="treatment_id" required>
                                     <option disabled="disabled" selected="selected">TIPO DE TRATAMIENTO*</option>
                                     {% for objeto in obj %}
     	                                <option>{{objeto.code}}<option>
