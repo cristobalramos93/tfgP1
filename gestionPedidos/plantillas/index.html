@@ -64,6 +64,14 @@
       <!-- Masthead Heading -->
       <h1 class="masthead-heading text-uppercase mb-0">Hola {{request.user.username}}</h1>
 
+
+        {% if request.user.id == request.user.medico.user_ptr_id %}
+        <form action='register' method='GET'>
+            <button class="btn btn-xl btn-outline-light" type='submit'> Registrar un paciente</button>
+        </form>
+        {% endif %}
+
+
       <!-- Icon Divider -->
       <div class="divider-custom divider-light">
         <div class="divider-custom-line"></div>
@@ -334,11 +342,15 @@
   <div class="portfolio-modal modal fade" id="portfolioModal1" tabindex="-1" role="dialog" aria-labelledby="portfolioModal1Label" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content">
+
+
+
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">
             <i class="fas fa-times"></i>
           </span>
         </button>
+
         <div class="modal-body text-center">
           <div class="container">
             <div class="row justify-content-center">

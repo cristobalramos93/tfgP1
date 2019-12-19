@@ -338,7 +338,7 @@ class Medico(User):
     medical_center = models.ForeignKey(Centro_medico, on_delete=models.PROTECT)
 
     def __str__(self):
-        return self.username 
+        return self.username
 
     class Meta:
         db_table = 'medico'
@@ -359,7 +359,7 @@ class Paciente(User):
         ('Tipo 2', 'Diabetes de tipo 2'),
         ('Otro', 'Diabetes de otro tipo')
     )
-    birth_date = models.DateField(null = True)
+    birth_date = models.DateField()
     diabetes_type = models.CharField(max_length=10, choices=TYPES)
     treatment = models.ForeignKey(Tratamiento, on_delete=models.PROTECT)
     start_date = models.DateField(null = True, blank = True)

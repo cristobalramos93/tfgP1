@@ -29,12 +29,6 @@ def register(request):
     tipo_diabetes = Paciente.TYPES
     if request.method == 'POST':
 
-        """"user = {{request.user.id}}
-        obj = Paciente.objects.get(user)
-        id_doctor = obj.doctor_id
-        doctor_id_id = id_doctor
-        buscar el id del medico que da de alta(sin comprobar)
-        """""
         password1 = request.POST['password1']
         password2 = request.POST['password2']
         email = request.POST['email']
