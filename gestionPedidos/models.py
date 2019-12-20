@@ -325,7 +325,7 @@ class Usuarios(models.Model):
 
 class Centro_medico(models.Model):
     name = models.CharField(max_length=250)
-    postal = models.IntegerField(max_length=250, blank = True, null=True)
+    #postal = models.IntegerField(max_length=250, blank = True, null=True)
 
     def __str__(self):
         return self.name
