@@ -371,5 +371,3 @@ class Paciente(User):
 
     class Meta:
         db_table = 'paciente'
-
-#comentario para poder hacer el puto push
