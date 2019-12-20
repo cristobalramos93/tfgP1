@@ -371,3 +371,5 @@ class Paciente(User):
 
     class Meta:
         db_table = 'paciente'
+
+#Comentario de prueba para hacer commit y push
