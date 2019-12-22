@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class GestionpedidosConfig(AppConfig):
-    name = 'gestionPedidos'
+    name = 'gestionPacientes'

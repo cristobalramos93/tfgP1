@@ -12,7 +12,7 @@ from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from django.contrib.auth.models import User
-from gestionPedidos.models import Paciente,Tratamiento, Pesos
+from gestionPacientes.models import Paciente,Tratamiento, Pesos
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password

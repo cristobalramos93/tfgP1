@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0011_update_proxy_permissions'),
-        ('gestionPedidos', '0002_auto_20191125_2020'),
+        ('gestionPacientes', '0002_auto_20191125_2020'),
     ]
 
     operations = [
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('user_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('board_number', models.CharField(max_length=250)),
-                ('medical_center', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='gestionPedidos.Centro_medico')),
+                ('medical_center', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='gestionPacientes.Centro_medico')),
             ],
             options={
                 'db_table': 'medico',
@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                 ('birth_date', models.DateField()),
                 ('diabetes_type', models.CharField(choices=[('Tipo_1', 'Diabetes tipo 1'), ('Tipo_2', 'Diabetes tipo 2'), ('Otro', 'Diabetes de otro tipo')], max_length=10)),
                 ('start_date', models.DateField(blank=True, null=True)),
-                ('doctor_id', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='gestionPedidos.Medico')),
+                ('doctor_id', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='gestionPacientes.Medico')),
             ],
             options={
                 'db_table': 'paciente',
@@ -192,6 +192,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='paciente',
             name='treatment',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='gestionPedidos.Tratamiento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='gestionPacientes.Tratamiento'),
         ),
     ]

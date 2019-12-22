@@ -7,13 +7,13 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gestionPedidos', '0005_auto_20191215_1623'),
+        ('gestionPacientes', '0005_auto_20191215_1623'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='paciente',
             name='treatment',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='gestionPedidos.Tratamiento'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='gestionPacientes.Tratamiento'),
         ),
     ]

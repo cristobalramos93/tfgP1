@@ -1,5 +1,5 @@
 from django.contrib import admin
-from gestionPedidos.models import Usuarios,TipoIns,Medico,Paciente,Centro_medico,Tratamiento
+from gestionPacientes.models import Usuarios,TipoIns,Medico,Paciente,Centro_medico,Tratamiento
 from django import forms
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
