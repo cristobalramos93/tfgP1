@@ -23,7 +23,10 @@ def welcome(request):
     return redirect('/login')
 
 def prueba(request):
-    return render(request,"pruebaBo.html")
+    return render(request,"cabecera.html")
+
+def home_prueba(request):
+    return render(request,"home_prueba.html")
 
 def register(request):
 
@@ -95,7 +98,7 @@ def login(request):
                 return redirect('/')
 
     # Si llegamos al final renderizamos el formulario
-    return render(request, "login.html")
+    return render(request, "cabecera.html")
 
 def logout(request):
     do_logout(request)
@@ -106,14 +109,14 @@ def download(request):
     if request.method == 'POST':
         first_date = request.POST['first_date']
         final_date = request.POST['final_date']
-        #seleccionaDia = request.POST.getlist['micasilladeverificacion[]']
+        campos = request.POST.getlist("casillas[]")
         format_str = '%d/%m/%Y'
         first_date = datetime.strptime(first_date, format_str)
         final_date = datetime.strptime(final_date, format_str)
     else:
         return render(request,'download.html')
 
-    items = Paciente.objects.filter(user_ptr_id=79,birth_date__gte=first_date, birth_date__lte= final_date)#id de un paciente
+    items = Paciente.objects.filter(user_ptr_id = 5,birth_date__gte=first_date, birth_date__lte= final_date)#id de un paciente
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="paciente.csv"'
 
