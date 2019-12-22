@@ -1,11 +1,7 @@
 import csv
 import io
-
-from django.contrib.auth.models import User
 from django.forms import forms
 from django.http import HttpResponse
-from django.shortcuts import render
-
 # Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout as do_logout
@@ -110,16 +106,14 @@ def download(request):
     if request.method == 'POST':
         first_date = request.POST['first_date']
         final_date = request.POST['final_date']
-
+        #seleccionaDia = request.POST.getlist['micasilladeverificacion[]']
         format_str = '%d/%m/%Y'
         first_date = datetime.strptime(first_date, format_str)
         final_date = datetime.strptime(final_date, format_str)
     else:
         return render(request,'download.html')
 
-    items = Paciente.objects.filter(birth_date = first_date)
-    #items = Paciente.objects.filter(birth_date = [first_date,final_date]) esta es la puta mierda que da el error
-
+    items = Paciente.objects.filter(user_ptr_id=79,birth_date__gte=first_date, birth_date__lte= final_date)#id de un paciente
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="paciente.csv"'
 
@@ -153,6 +147,7 @@ def upload(request):
             doctor_id_id=column[3],
             treatment_id=column[4],
             username=column[5],
+
         )
         return render(request, template)
 
