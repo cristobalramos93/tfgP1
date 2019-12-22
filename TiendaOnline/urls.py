@@ -25,5 +25,6 @@ urlpatterns = [
     path('prueba/', views.prueba),
     path('register/', views.register),
     path('download/', views.download),
+    path('upload/', views.upload),
 
 ]

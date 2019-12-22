@@ -1,4 +1,5 @@
 import csv
+import io
 
 from django.contrib.auth.models import User
 from django.forms import forms
@@ -15,6 +16,7 @@ from gestionPedidos.models import Paciente,Tratamiento, Pesos
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
+from django.contrib import messages
 
 
 def welcome(request):
@@ -127,3 +129,31 @@ def download(request):
     for obj in items:
         writer.writerow([obj.user_ptr_id, obj.birth_date, obj.diabetes_type, obj.start_date, obj.doctor_id_id, obj.treatment_id])
     return response
+
+def upload(request):
+    template = "upload.html"
+
+    prompt = {
+        'order': 'Order of the CSV should be user_prt_id, birth_date, diabetes_type, start_date, doctor_id_id, treatment_id, username '
+    }
+
+    if request.method == 'GET':
+        return render(request, template, prompt)
+
+    csv_file = request.FILES['file']
+
+    data_set = csv_file.read().decode('UTF-8')
+    io_string = io.StringIO(data_set)
+    next(io_string)
+    for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+        _, created = Paciente.objects.update_or_create(
+            birth_date=column[0],
+            diabetes_type=column[1],
+            start_date=column[2],
+            doctor_id_id=column[3],
+            treatment_id=column[4],
+            username=column[5],
+        )
+        return render(request, template)
+
+
