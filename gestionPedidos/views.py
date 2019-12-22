@@ -1,5 +1,8 @@
+import csv
+
 from django.contrib.auth.models import User
 from django.forms import forms
+from django.http import HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
@@ -12,6 +15,7 @@ from gestionPedidos.models import Paciente,Tratamiento, Pesos
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
+
 
 def welcome(request):
     # Si estamos identificados devolvemos la portada
@@ -97,6 +101,29 @@ def login(request):
 
 def logout(request):
     do_logout(request)
-
     # Redireccionamos a la portada
     return redirect('/')
+
+def download(request):
+    if request.method == 'POST':
+        first_date = request.POST['first_date']
+        final_date = request.POST['final_date']
+
+        format_str = '%d/%m/%Y'
+        first_date = datetime.strptime(first_date, format_str)
+        final_date = datetime.strptime(final_date, format_str)
+    else:
+        return render(request,'download.html')
+
+    items = Paciente.objects.filter(birth_date = first_date)
+    #items = Paciente.objects.filter(birth_date = [first_date,final_date]) esta es la puta mierda que da el error
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="paciente.csv"'
+
+    writer = csv.writer(response, delimiter=',')
+    writer.writerow(['user_prt_id','birth_date', 'diabetes_type', 'start_date', 'doctor_id_id', 'treatment_id'])
+
+    for obj in items:
+        writer.writerow([obj.user_ptr_id, obj.birth_date, obj.diabetes_type, obj.start_date, obj.doctor_id_id, obj.treatment_id])
+    return response
