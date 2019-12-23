@@ -45,7 +45,7 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <input class="input--style-1" type="number" placeholder="PESO DEL PACIENTE" name="weight"required>
+                            <input class="input--style-1" type="number" placeholder="PESO DEL PACIENTE" name="weight">
                         </div>
                         <div class="input-group">
                                     <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE NACIMIENTO*" name="birth_date"required>
@@ -58,7 +58,9 @@
                         <div class="input-group">
                             <div class="rs-select2 js-select-simple select--no-search">
                                 <select name="diabetes_type" required>
-                                    <option disabled="disabled" selected="selected">TIPO DE DIABETES*</option>
+                                    <option value="">
+                                        TIPO DE DIABETES*
+                                    </option>
                                     {% for objeto in tipo_diabetes %}
     	                                <option>{{objeto.0}}<option>
                                     {% endfor %}
@@ -69,7 +71,9 @@
                         <div class="input-group">
                             <div class="rs-select2 js-select-simple select--no-search">
                                 <select name="treatment_id" required>
-                                    <option disabled="disabled" selected="selected">TIPO DE TRATAMIENTO*</option>
+                                    <option value="">
+                                        TIPO DE TRATAMIENTO*
+                                    </option>
                                     {% for objeto in obj %}
     	                                <option>{{objeto.code}}<option>
                                     {% endfor %}
@@ -80,17 +84,19 @@
                         <div class="row row-space">
                             <div class="col-2">
                                 <div class="input-group">
-                                    <input class="input--style-1" type="password" placeholder="CONTRASEÑA*" name="password1" id="con1" required>
+                                    <input class="input--style-1" type="password" placeholder="CONTRASEÑA*" name="password1" id="con1" pattern=".{6,}" title="Debe contener mínimo 6 caracteres" required>
                                 </div>
                             </div>
                         </div>
                         <div class="row row-space">
                             <div class="col-2">
                                 <div class="input-group">
-                                    <input class="input--style-1" type="password" placeholder="REPETIR CONTRASEÑA*" name="password2" id="con2" required>
+                                    <input class="input--style-1" type="password" placeholder="REPETIR CONTRASEÑA*" name="password2" id="con2" pattern=".{6,}" title="Debe contener mínimo 6 caracteres" required>
                                 </div>
                             </div>
                         </div>
+                        <div class="alert alert-success"><font color="red">{{msg}}</font></div>
+
                         <div class="p-t-20">
                             <button class="btn btn--radius btn--green" type="submit">Submit</button>
                         </div>

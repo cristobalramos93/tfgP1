@@ -7,7 +7,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
-from django.contrib.auth.models import User
 from gestionPacientes.models import Paciente,Tratamiento, Pesos
 from datetime import datetime
 from django.shortcuts import render
@@ -49,8 +48,7 @@ def register(request):
         treatment_id = treatment_id.id
 
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords don't match")
-
+            return render(request, 'register.html', {'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "Las contraseñas deben ser iguales"})
 
         paciente = Paciente(
             password = make_password(password1),
@@ -63,18 +61,22 @@ def register(request):
         )
         paciente.save()
 
+        try:
+            weight = request.POST['weight']
+            paciente_peso = Paciente.objects.get(username=email)
+            paciente_peso = paciente_peso.user_ptr_id
 
-        weight = request.POST['weight']
-        paciente_peso = Paciente.objects.get(username=email)
-        paciente_peso = paciente_peso.user_ptr_id
+            peso = Pesos(
+                peso = weight,
+                iduser= paciente_peso,
+                date = datetime.now()
+            )
+            peso.save()
+        except Exception as e:
+            print("no peso")
 
-        peso = Pesos(
-            peso = weight,
-            iduser= paciente_peso,
-            date = datetime.now()
-        )
-        peso.save()
         return redirect("/")
+
     else:
         return render(request,'register.html',{'obj': obj, 'tipo_diabetes' : tipo_diabetes})
 
@@ -116,14 +118,16 @@ def download(request):
     else:
         return render(request,'download.html')
 
-    items = Paciente.objects.filter(user_ptr_id = 5,birth_date__gte=first_date, birth_date__lte= final_date)#id de un paciente
+    items = Paciente.objects.filter(user_ptr_id = 62,birth_date__gte=first_date, birth_date__lte= final_date)#id de un paciente
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="paciente.csv"'
 
     writer = csv.writer(response, delimiter=',')
+    #aqui poner loas campos que salen en la cabecera
     writer.writerow(['user_prt_id','birth_date', 'diabetes_type', 'start_date', 'doctor_id_id', 'treatment_id'])
 
     for obj in items:
+        #aqui poner los resultados del objeto(la lista es campos)
         writer.writerow([obj.user_ptr_id, obj.birth_date, obj.diabetes_type, obj.start_date, obj.doctor_id_id, obj.treatment_id])
     return response
 
