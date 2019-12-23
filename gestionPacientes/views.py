@@ -108,43 +108,49 @@ def logout(request):
     return redirect('/')
 
 def download(request):
+    id_doctor = request.user.medico.user_ptr_id
+    pacientes = Paciente.objects.filter(doctor_id_id=id_doctor)
     if request.method == 'POST':
         first_date = request.POST['first_date']
         final_date = request.POST['final_date']
         campos = request.POST.getlist("casillas[]")
+        usuario = request.POST['usuario']
         format_str = '%d/%m/%Y'
         first_date = datetime.strptime(first_date, format_str)
         final_date = datetime.strptime(final_date, format_str)
     else:
-        return render(request,'download.html')
+        return render(request,'download.html',{'pacientes' : pacientes})
 
-    items = Paciente.objects.filter(user_ptr_id = 62,birth_date__gte=first_date, birth_date__lte= final_date)#id de un paciente
+    items = Paciente.objects.filter(username = usuario,birth_date__gte=first_date, birth_date__lte= final_date)#saca los datos del usuario seleccionado con las fechas selecionadas
+    usuario_seleccionado = Paciente.objects.get(username=usuario) #saca al usuario seleccionado
+    itemPeso = Pesos.objects.filter(iduser = usuario_seleccionado.id) ##lo busca en la tabla pesos por el id del usuario seleccionado
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="paciente.csv"'
 
     writer = csv.writer(response, delimiter=',')
-    #aqui poner loas campos que salen en la cabecera
-    writer.writerow(['user_prt_id','birth_date', 'diabetes_type', 'start_date', 'doctor_id_id', 'treatment_id'])
+    writer.writerow(campos) #aqui poner loas campos que salen en la cabecera
 
-    for obj in items:
-        #aqui poner los resultados del objeto(la lista es campos)
-        writer.writerow([obj.user_ptr_id, obj.birth_date, obj.diabetes_type, obj.start_date, obj.doctor_id_id, obj.treatment_id])
+    for obj in items: #tabla de pacientes
+        for on in itemPeso: #tabla de pesos
+            #aqui poner los resultados del objeto(la lista es campos)
+            writer.writerow([obj.user_ptr_id, obj.birth_date, obj.diabetes_type, obj.start_date, obj.doctor_id_id, obj.treatment_id]
+           + [ on.peso])
     return response
 
 def upload(request):
     template = "upload.html"
 
-    prompt = {
-        'order': 'Order of the CSV should be user_prt_id, birth_date, diabetes_type, start_date, doctor_id_id, treatment_id, username '
-    }
-
     if request.method == 'GET':
-        return render(request, template, prompt)
+        return render(request, template)
 
     csv_file = request.FILES['file']
 
     data_set = csv_file.read().decode('UTF-8')
     io_string = io.StringIO(data_set)
+    cabecera = (io_string.getvalue().split('\r'))
+    if(cabecera[0] != "birth_date, diabetes_type, start_date, doctor_id_id, treatment_id, username"):
+        return render(request,template,{'msg' : "Error en la cabecera del archivo"})
+
     next(io_string)
     for column in csv.reader(io_string, delimiter=',', quotechar="|"):
         _, created = Paciente.objects.update_or_create(
@@ -156,6 +162,6 @@ def upload(request):
             username=column[5],
 
         )
-        return render(request, template)
+    return render(request, template)
 
 

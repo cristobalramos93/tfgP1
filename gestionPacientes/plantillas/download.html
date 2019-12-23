@@ -38,6 +38,20 @@
                     <form  method="POST">
                             {% csrf_token %}
                         <div class="input-group">
+                            <div class="rs-select2 js-select-simple select--no-search">
+                                <select name="usuario" required>
+                                    <option value="">
+                                        PACIENTE*
+                                    </option>
+                                    {% for objeto in pacientes %}
+    	                                <option>{{objeto.username}}<option>
+                                    {% endfor %}
+                                </select>
+                                <div class="select-dropdown"></div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
                                     <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE INICIO*" name="first_date"required>
                                     <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
                         </div>
@@ -46,12 +60,15 @@
                             <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
                         </div>
                         <div class="input-group">
+
                             <input type="checkbox" name="casillas[]" value="ptr_user_id" >id </input>
                             <input type="checkbox" name="casillas[]" value="birth_date" >Fecha de nacimiento</input>
                             <input type="checkbox" name="casillas[]" value="diabetes_type" >Tipo de diabetes</input>
-                            <input type="checkbox" name="casillas[]" value="start_date" >fecha de comienzo</input>
+                            <input type="checkbox" name="casillas[]" value="start_date" >Fecha de comienzo</input>
                             <input type="checkbox" name="casillas[]" value="doctor_id_id" >Id del doctor</input>
                             <input type="checkbox" name="casillas[]" value="treatment_id" >Id de tratamiento</input>
+                            <input type="checkbox" name="casillas[]" value="peso" >Peso</input>
+
                         </div>
                         <div class="p-t-20">
                             <button class="btn btn--radius btn--green" type="submit">Submit</button>
