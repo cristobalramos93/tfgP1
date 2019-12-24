@@ -22,10 +22,8 @@ def welcome(request):
     return redirect('/login')
 
 def prueba(request):
-    return render(request,"cabecera.html")
+    return render(request,"home.html")
 
-def home_prueba(request):
-    return render(request,"home_prueba.html")
 
 def register(request):
 
@@ -100,7 +98,7 @@ def login(request):
                 return redirect('/')
 
     # Si llegamos al final renderizamos el formulario
-    return render(request, "cabecera.html")
+    return render(request, "login.html")
 
 def logout(request):
     do_logout(request)

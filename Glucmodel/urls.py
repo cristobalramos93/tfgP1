@@ -26,6 +26,5 @@ urlpatterns = [
     path('register/', views.register),
     path('download/', views.download),
     path('upload/', views.upload),
-    path('home_prueba/', views.home_prueba),
 
 ]

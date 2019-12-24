@@ -1,20 +1,9 @@
+{% extends "base.html" %}
 {% load staticfiles i18n %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Registro-Paciente{% endblock title %}
 
-<head>
-    <!-- Required meta tags-->
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Colorlib Templates">
-    <meta name="author" content="Colorlib">
-    <meta name="keywords" content="Colorlib Templates">
-
-    <!-- Title Page-->
-    <title>Registro de Paciente</title>
-
+{% block css %}
     <!-- Icons font CSS-->
     <link href="{% static 'vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet" media="all">
     <link href="{% static 'vendor/font-awesome-4.7/css/font-awesome.min.css' %}" rel="stylesheet" media="all">
@@ -26,87 +15,77 @@
 
     <!-- Main CSS-->
     <link href="{% static 'css/main.css' %}" rel="stylesheet" media="all">
-</head>
+{% endblock css %}
 
-<body>
-    <div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
-        <div class="wrapper wrapper--w680">
-            <div class="card card-1">
-                <div class="card-heading"></div>
-                <div class="card-body">
-                    <h2 class="title">Registro de Paciente</h2>
-                    <form  method="POST">
-                            {% csrf_token %}
-                        <div class="row row-space">
-                            <div class="col-2">
-                                <div class="input-group">
-                                    <input class="input--style-1" type="email" placeholder="CORREO ELECTRÓNICO*" name="email" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <input class="input--style-1" type="number" placeholder="PESO DEL PACIENTE" name="weight">
-                        </div>
-                        <div class="input-group">
-                                    <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE NACIMIENTO*" name="birth_date"required>
-                                    <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
-                        </div>
-                        <div class="input-group">
-                            <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE COMIENZO*" name="start_date"required>
-                            <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
-                        </div>
-                        <div class="input-group">
-                            <div class="rs-select2 js-select-simple select--no-search">
-                                <select name="diabetes_type" required>
-                                    <option value="">
-                                        TIPO DE DIABETES*
-                                    </option>
-                                    {% for objeto in tipo_diabetes %}
-    	                                <option>{{objeto.0}}<option>
-                                    {% endfor %}
-                                </select>
-                                <div class="select-dropdown"></div>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <div class="rs-select2 js-select-simple select--no-search">
-                                <select name="treatment_id" required>
-                                    <option value="">
-                                        TIPO DE TRATAMIENTO*
-                                    </option>
-                                    {% for objeto in obj %}
-    	                                <option>{{objeto.code}}<option>
-                                    {% endfor %}
-                                </select>
-                                <div class="select-dropdown"></div>
-                            </div>
-                        </div>
-                        <div class="row row-space">
-                            <div class="col-2">
-                                <div class="input-group">
-                                    <input class="input--style-1" type="password" placeholder="CONTRASEÑA*" name="password1" id="con1" pattern=".{6,}" title="Debe contener mínimo 6 caracteres" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row row-space">
-                            <div class="col-2">
-                                <div class="input-group">
-                                    <input class="input--style-1" type="password" placeholder="REPETIR CONTRASEÑA*" name="password2" id="con2" pattern=".{6,}" title="Debe contener mínimo 6 caracteres" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="alert alert-success"><font color="red">{{msg}}</font></div>
+{% block content %}
+<div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
+    <div class="wrapper wrapper--w680">
+        <div class="card card-1">
+            <div class="card-heading"></div>
+            <div class="card-body">
+                <h2 class="title">Registro de Paciente</h2>
+                <form  method="POST">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input class="input--style-1" type="email" placeholder="CORREO ELECTRÓNICO*" name="email" required>
+                    </div>
 
-                        <div class="p-t-20">
-                            <button class="btn btn--radius btn--green" type="submit">Registrar</button>
+                    <div class="input-group">
+                        <input class="input--style-1" type="number" placeholder="PESO DEL PACIENTE" name="weight">
+                    </div>
+                    <div class="input-group">
+                                <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE NACIMIENTO*" name="birth_date"required>
+                                <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
+                    </div>
+                    <div class="input-group">
+                        <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE COMIENZO*" name="start_date"required>
+                        <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
+                    </div>
+                    <div class="input-group">
+                        <div class="rs-select2 js-select-simple select--no-search">
+                            <select name="diabetes_type" required>
+                                <option value="">
+                                    TIPO DE DIABETES*
+                                </option>
+                                {% for objeto in tipo_diabetes %}
+                                    <option>{{objeto.0}}<option>
+                                {% endfor %}
+                            </select>
+                            <div class="select-dropdown"></div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="rs-select2 js-select-simple select--no-search">
+                            <select name="treatment_id" required>
+                                <option value="">
+                                    TIPO DE TRATAMIENTO*
+                                </option>
+                                {% for objeto in obj %}
+                                    <option>{{objeto.code}}<option>
+                                {% endfor %}
+                            </select>
+                            <div class="select-dropdown"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input class="input--style-1" type="password" placeholder="CONTRASEÑA*" name="password1" id="con1" pattern=".{6,}" title="Debe contener mínimo 6 caracteres" required>
+                    </div>
+                    <div class="input-group">
+                        <input class="input--style-1" type="password" placeholder="REPETIR CONTRASEÑA*" name="password2" id="con2" pattern=".{6,}" title="Debe contener mínimo 6 caracteres" required>
+                    </div>
+                    <div class="alert"><font color="red">{{msg}}</font></div>
+
+                    <div class="p-t-20">
+                        <button class="btn btn--radius btn--green" type="submit">Registrar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+{% endblock content %}
 
-</form>
+{% block js %}
     <!-- Jquery JS-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <!-- Vendor JS-->
@@ -117,7 +96,4 @@
     <!-- Main JS-->
     <script src="{% static 'js/global.js' %}"></script>
 
-</body><!-- This templates was made by Colorlib (https://colorlib.com) -->
-
-</html>
-<!-- end document-->
+{% endblock js %}
