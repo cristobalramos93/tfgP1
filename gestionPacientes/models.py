@@ -372,4 +372,29 @@ class Paciente(User):
     class Meta:
         db_table = 'paciente'
 
-#Comentario de prueba para hacer commit y push
+
+class Centro_investigacion(models.Model):
+    name = models.CharField(max_length=250)
+    #postal = models.IntegerField(max_length=250, blank = True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'centro_investigacion'
+
+
+class Investigador(User):
+    TYPES_INVEST = (
+        ('Research', 'Investigador de busqueda'),
+        ('Analisis', 'Investigador de analisis'),
+        ('Otro', 'otro tipo de investigador')
+    )
+    Investigator_type = models.CharField(max_length=10, choices=TYPES_INVEST)
+    investigation_center = models.ForeignKey(Centro_investigacion, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        db_table = 'investigador'

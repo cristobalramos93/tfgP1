@@ -1,5 +1,6 @@
 from django.contrib import admin
-from gestionPacientes.models import Usuarios,TipoIns,Medico,Paciente,Centro_medico,Tratamiento
+from gestionPacientes.models import Usuarios, TipoIns, Medico, Paciente, Centro_medico, Tratamiento, Investigador, \
+    Centro_investigacion
 from django import forms
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -9,6 +10,7 @@ admin.site.register(Usuarios)
 admin.site.register(TipoIns)
 admin.site.register(Paciente)
 admin.site.register(Centro_medico)
+admin.site.register(Centro_investigacion)
 admin.site.register(Tratamiento)
 
 class UserCreationForm(forms.ModelForm):
@@ -18,7 +20,7 @@ class UserCreationForm(forms.ModelForm):
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
     class Meta:
-        model = Medico
+        proxy = True
         fields = ('email',)
 
     def clean_password2(self):
@@ -44,7 +46,7 @@ class UserChangeForm(forms.ModelForm):
     password = ReadOnlyPasswordHashField()
 
     class Meta:
-        model = Medico
+        proxy = True
         fields = ('email', 'password')
 
     def clean_password(self):
@@ -81,3 +83,34 @@ class MedicoAdmin(BaseUserAdmin):
 # Register your models here.
 
 admin.site.register(Medico, MedicoAdmin)
+
+
+class InvestigadorAdmin(BaseUserAdmin):
+    # The forms to add and change user instances
+    form = UserChangeForm
+    add_form = UserCreationForm
+
+    # The fields to be used in displaying the User model.
+    # These override the definitions on the base UserAdmin
+    # that reference specific fields on auth.User.
+    list_display = ('email', 'is_active', 'is_staff')
+    list_filter = ('email',)
+    fieldsets = (
+        (None,
+         {'fields': ('username', 'first_name', 'last_name', 'email', 'password', 'Investigator_type', 'investigation_center')}),
+
+    )
+    # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
+    # overrides get_fieldsets to use this attribute when creating a user.
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+            'username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'Investigator_type', 'investigation_center')}
+         ),
+    )
+    search_fields = ('email',)
+    ordering = ('email',)
+    filter_horizontal = ()
+
+admin.site.register(Investigador, InvestigadorAdmin)
