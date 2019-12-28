@@ -398,3 +398,12 @@ class Investigador(User):
 
     class Meta:
         db_table = 'investigador'
+
+class Calorias(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null= False, blank= False)
+    calories = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'calorias'
+        unique_together = (('id_user', 'time'),)
