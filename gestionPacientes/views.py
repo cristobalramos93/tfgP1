@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from Glucmodel.settings import DATABASES
 
-from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias
+from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -149,36 +149,64 @@ def upload(request):
 
     csv_file = request.FILES['file']
     #si la cabecera es calorias
-    calorias(request,csv_file)
+    nom = csv_file.name.split('_')
+    if(nom[2] == "cals" or nom[2] == "heart" or nom[2] == "sleep" or nom[2] == "steps" ):
+        msg = fitbit(request,csv_file)
 
 
-    return render(request, template)
+    return render(request, template,{'msg': msg})
 
-def calorias(request,csv_file):
+def fitbit(request,csv_file):
+    nom = csv_file.name.split('_') #sacamos la fecha del nombre del archivo
+    tipo = nom[2]
+    nom = nom[3].split('.')
+    nom = nom[0]
     cal_data = pd.read_csv(csv_file, skiprows=1, sep=',', names=['time', 'calories'])
     # Convert time to time series
-    cal_data['time'] = pd.to_datetime("2018-06-13" + ' ' + cal_data['time'])#HAY QUE CAMBIAR FECHA POR TITULO DEL DOC
+    cal_data['time'] = pd.to_datetime(nom + ' ' + cal_data['time'])
     cal_data.set_index('time', inplace=True)
     # 5 minutes resampling
     cal_data = cal_data.resample('5T').sum()
     cal_data = cal_data.assign(id_user_id = request.user.paciente.user_ptr_id)
 
-    cal_data.to_csv('calorias.csv')#crea csv de calorias
+    cal_data.to_csv('calorias.csv')#crea csv de calorias con los resultados del script
     csv_file = open('calorias.csv', 'rb')#importa datos del csv de calorias
     data_set = csv_file.read().decode('UTF-8')#lee los datos
     csv_file.close()#cierra el archivo calorias para poder eliminarlo
     os.remove('calorias.csv')#elimina el archivo
     io_string = io.StringIO(data_set)
     next(io_string)
-    for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-        _, created = Calorias.objects.update_or_create(
-            time=column[0],
-            calories=column[1],
-            id_user_id=column[2],
+    if(tipo == "cals"):
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
+            _, created = Calorias.objects.update_or_create(
+                time=column[0],
+                calories=column[1],
+                id_user_id=column[2],
+            )
+        msg = "Calorías subidas con éxito"
 
-        )
+    elif(tipo == "heart"):
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
+            _, created = Ritmo_cardiaco.objects.update_or_create(
+                time=column[0],
+                heart_rate=column[1],
+                id_user_id=column[2],
+            )
+        msg = "Ritmo cardiaco subido con éxito"
 
+    elif(tipo == "steps"):
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
+            _, created = Pasos.objects.update_or_create(
+                time=column[0],
+                steps=column[1],
+                id_user_id=column[2],
+            )
+        msg = "Pasos subidos con éxito"
 
+    else:
+        msg = "Error en el archivo"
+
+    return msg
 
 
 

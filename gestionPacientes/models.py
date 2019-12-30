@@ -407,3 +407,22 @@ class Calorias(models.Model):
     class Meta:
         db_table = 'calorias'
         unique_together = (('id_user', 'time'),)
+
+class Ritmo_cardiaco(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null= False, blank= False)
+    heart_rate = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'ritmo_cardiaco'
+        unique_together = (('id_user', 'time'),)
+
+
+class Pasos(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null= False, blank= False)
+    steps = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'pasos'
+        unique_together = (('id_user', 'time'),)
