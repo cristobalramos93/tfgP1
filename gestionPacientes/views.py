@@ -1,5 +1,7 @@
 import csv
 import io
+import os
+import pandas as pd
 from django.forms import forms
 from django.http import HttpResponse
 # Create your views here.
@@ -7,7 +9,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
-from gestionPacientes.models import Paciente,Tratamiento, Pesos
+from Glucmodel.settings import DATABASES
+
+from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -135,6 +139,8 @@ def download(request):
            + [ on.peso])
     return response
 
+
+
 def upload(request):
     template = "upload.html"
 
@@ -142,24 +148,37 @@ def upload(request):
         return render(request, template)
 
     csv_file = request.FILES['file']
+    #si la cabecera es calorias
+    calorias(request,csv_file)
 
-    data_set = csv_file.read().decode('UTF-8')
+
+    return render(request, template)
+
+def calorias(request,csv_file):
+    cal_data = pd.read_csv(csv_file, skiprows=1, sep=',', names=['time', 'calories'])
+    # Convert time to time series
+    cal_data['time'] = pd.to_datetime("2018-06-13" + ' ' + cal_data['time'])#HAY QUE CAMBIAR FECHA POR TITULO DEL DOC
+    cal_data.set_index('time', inplace=True)
+    # 5 minutes resampling
+    cal_data = cal_data.resample('5T').sum()
+    cal_data = cal_data.assign(id_user_id = request.user.paciente.user_ptr_id)
+
+    cal_data.to_csv('calorias.csv')#crea csv de calorias
+    csv_file = open('calorias.csv', 'rb')#importa datos del csv de calorias
+    data_set = csv_file.read().decode('UTF-8')#lee los datos
+    csv_file.close()#cierra el archivo calorias para poder eliminarlo
+    os.remove('calorias.csv')#elimina el archivo
     io_string = io.StringIO(data_set)
-    cabecera = (io_string.getvalue().split('\r'))
-    if(cabecera[0] != "birth_date, diabetes_type, start_date, doctor_id_id, treatment_id, username"):
-        return render(request,template,{'msg' : "Error en la cabecera del archivo"})
-
     next(io_string)
     for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-        _, created = Paciente.objects.update_or_create(
-            birth_date=column[0],
-            diabetes_type=column[1],
-            start_date=column[2],
-            doctor_id_id=column[3],
-            treatment_id=column[4],
-            username=column[5],
+        _, created = Calorias.objects.update_or_create(
+            time=column[0],
+            calories=column[1],
+            id_user_id=column[2],
 
         )
-    return render(request, template)
+
+
+
 
 
