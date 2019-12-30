@@ -1,7 +1,10 @@
 import csv
 import io
 import os
+from wsgiref.util import FileWrapper
+
 import pandas as pd
+from djqscsv import write_csv
 from django.forms import forms
 from django.http import HttpResponse
 # Create your views here.
@@ -109,6 +112,11 @@ def logout(request):
     # Redireccionamos a la portada
     return redirect('/')
 
+
+def file(param):
+    pass
+
+
 def download(request):
     id_doctor = request.user.medico.user_ptr_id
     pacientes = Paciente.objects.filter(doctor_id_id=id_doctor)
@@ -123,21 +131,30 @@ def download(request):
     else:
         return render(request,'download.html',{'pacientes' : pacientes})
 
-    items = Paciente.objects.filter(username = usuario,birth_date__gte=first_date, birth_date__lte= final_date)#saca los datos del usuario seleccionado con las fechas selecionadas
-    usuario_seleccionado = Paciente.objects.get(username=usuario) #saca al usuario seleccionado
-    itemPeso = Pesos.objects.filter(iduser = usuario_seleccionado.id) ##lo busca en la tabla pesos por el id del usuario seleccionado
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="paciente.csv"'
+    id_usuario = Paciente.objects.get(username = usuario).id
+    df = pd.DataFrame(columns=['time', "id_user_id"])
+    for tabla in campos:
+        if tabla == "Calorias":
+            items = Calorias.objects.filter(id_user_id = id_usuario,time__gte=first_date, time__lte= final_date)
+        elif tabla == "Pasos":
+            items = Pasos.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Ritmo_cardiaco":
+            items = Ritmo_cardiaco.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
 
-    writer = csv.writer(response, delimiter=',')
-    writer.writerow(campos) #aqui poner loas campos que salen en la cabecera
+        with open('items.csv', 'wb') as csv_file:
+            write_csv(items, csv_file)
+        df_aux = pd.read_csv("items.csv")
+        df_aux = df_aux.drop(columns = ["ID"])
+        df = df.merge(df_aux, on = ['time','id_user_id'], how = 'outer')
+        csv_file.close()  # cierra el archivo calorias para poder eliminarlo
+        os.remove('items.csv')
+    df.to_csv("final.csv")
 
-    for obj in items: #tabla de pacientes
-        for on in itemPeso: #tabla de pesos
-            #aqui poner los resultados del objeto(la lista es campos)
-            writer.writerow([obj.user_ptr_id, obj.birth_date, obj.diabetes_type, obj.start_date, obj.doctor_id_id, obj.treatment_id]
-           + [ on.peso])
-    return response
+    with open('final.csv') as myfile:
+        response = HttpResponse(myfile, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename = datos.csv'
+        os.remove("final.csv")
+        return response
 
 
 
