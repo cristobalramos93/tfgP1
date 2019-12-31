@@ -3,6 +3,7 @@ import io
 import os
 from wsgiref.util import FileWrapper
 
+import numpy as np
 import pandas as pd
 from djqscsv import write_csv
 from django.forms import forms
@@ -14,7 +15,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from Glucmodel.settings import DATABASES
 
-from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos
+from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -140,6 +141,10 @@ def download(request):
             items = Pasos.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
         elif tabla == "Ritmo_cardiaco":
             items = Ritmo_cardiaco.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Siesta":
+            items = Siesta.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Suenio":
+            items = Suenio.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
 
         with open('items.csv', 'wb') as csv_file:
             write_csv(items, csv_file)
@@ -148,6 +153,8 @@ def download(request):
         df = df.merge(df_aux, on = ['time','id_user_id'], how = 'outer')
         csv_file.close()  # cierra el archivo calorias para poder eliminarlo
         os.remove('items.csv')
+    df = df.set_index("time", drop=True)
+    df = df.sort_index()
     df.to_csv("final.csv")
 
     with open('final.csv') as myfile:
@@ -155,7 +162,6 @@ def download(request):
         response['Content-Disposition'] = 'attachment; filename = datos.csv'
         os.remove("final.csv")
         return response
-    #para hacer un push en git
 
 
 
@@ -168,11 +174,89 @@ def upload(request):
     csv_file = request.FILES['file']
     #si la cabecera es calorias
     nom = csv_file.name.split('_')
-    if(nom[2] == "cals" or nom[2] == "heart" or nom[2] == "sleep" or nom[2] == "steps" ):
+    if nom[2] == "cals" or nom[2] == "heart" or nom[2] == "steps" :
         msg = fitbit(request,csv_file)
-
-
+    elif nom[2] == "sleep":
+        msg = sleep_nap(request,csv_file)
     return render(request, template,{'msg': msg})
+
+
+def sleep_nap(request, csv_file):
+    nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
+    tipo = nom[4]
+    # Data file name
+    sl_data = pd.read_csv(csv_file, skiprows=1, sep=',', names=['Hora', 'Duracion (m)', 'Estado'])
+
+    # Convert from seconds to minutes sleep time
+    sl_data['Duracion (m)'] = sl_data['Duracion (m)'] / 60
+
+    # Convert time to time series
+    sl_data['Hora'] = pd.to_datetime(sl_data['Hora'])
+
+    # Create new DataFrame to store treated data
+    sl_treat_data = pd.DataFrame()
+
+    # Create 1/2 minute frequency time series and fill with nan values
+    sl_treat_data['Hora'] = pd.date_range(start=sl_data['Hora'].min(), end=sl_data['Hora'].max(), freq='0.5T')
+    sl_treat_data['Estado'] = np.nan
+
+    # Add to every row the sleep state. Then, the most repeated word is the one
+    # set as the sleep state for those five minutes.
+    j = 1
+
+    for i in range(sl_treat_data.shape[0]):
+        if sl_treat_data['Hora'][i] < sl_data['Hora'][j]:
+            sl_treat_data.loc[i, 'Estado'] = sl_data.loc[j - 1, 'Estado']
+        else:
+            sl_treat_data.loc[i, 'Estado'] = sl_data.loc[j, 'Estado']
+            j += 1
+
+    sl_treat_data.set_index('Hora', inplace=True)
+    sl_treat_data = sl_treat_data.resample('5T').sum()
+
+    for i in range(sl_treat_data.shape[0]):
+        w = sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')].count('w')
+        l = sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')].count('l')
+        r = sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')].count('r')
+        d = sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')].count('d')
+
+        if w >= l and w >= r and w >= d:
+            sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')] = 'wake'
+        if l >= w and l >= r and l >= d:
+            sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')] = 'light'
+        if r >= w and r >= l and r >= d:
+            sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')] = 'rem'
+        if d >= w and d >= l and d >= r:
+            sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')] = 'deep'
+    sl_treat_data = sl_treat_data.assign(id_user_id = request.user.paciente.user_ptr_id)
+
+    sl_treat_data.to_csv('sleep.csv')  # crea csv de calorias con los resultados del script
+    csv_file = open('sleep.csv', 'rb')  # importa datos del csv de calorias
+    data_set = csv_file.read().decode('UTF-8')  # lee los datos
+    csv_file.close()  # cierra el archivo calorias para poder eliminarlo
+    os.remove('sleep.csv')  # elimina el archivo
+    io_string = io.StringIO(data_set)
+    next(io_string)
+    if tipo == "night.csv":
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+            _, created = Suenio.objects.update_or_create(
+                time=column[0],
+                sleep_state=column[1],
+                id_user_id=column[2],
+                )
+        msg = "Sueño subido con éxito"
+
+    elif tipo == "nap":
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+            _, created = Siesta.objects.update_or_create(
+                time=column[0],
+                nap_state=column[1],
+                id_user_id=column[2],
+                )
+        msg = "Siesta subida con éxito"
+    else:
+        msg = "Error en el archivo"
+    return msg
 
 def fitbit(request,csv_file):
     nom = csv_file.name.split('_') #sacamos la fecha del nombre del archivo

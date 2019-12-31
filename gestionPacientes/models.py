@@ -426,3 +426,23 @@ class Pasos(models.Model):
     class Meta:
         db_table = 'pasos'
         unique_together = (('id_user', 'time'),)
+
+class Suenio(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null= False, blank= False)
+    sleep_state = models.CharField(max_length=250)
+    #sleep_duration = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'suenio'
+        unique_together = (('id_user', 'time'),)
+
+class Siesta(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null= False, blank= False)
+    nap_state = models.CharField(max_length=250)
+    #nap_duration = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'siesta'
+        unique_together = (('id_user', 'time'),)
