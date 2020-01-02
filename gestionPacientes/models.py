@@ -450,15 +450,17 @@ class Siesta(models.Model):
 class Siesta_resumen(models.Model):
     id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
     time = models.DateTimeField(null= False, blank= False)
-    main_sleep= models.BooleanField()
-    efficiency = models.FloatField(max_length=250)
-    duration= models.FloatField(max_length=250)
-    minutes_asleep = models.FloatField(max_length=250)
-    minutes_light = models.FloatField(max_length=250)
-    minutes_deep = models.FloatField(max_length=250)
-    minutes_rem = models.FloatField(max_length=250)
-    minutes_awake = models.FloatField(max_length=250)
-    minutes_in_bed = models.FloatField(max_length=250)
+    nap_main_sleep= models.BooleanField()
+    nap_efficiency = models.FloatField(max_length=250)
+    nap_duration= models.FloatField(max_length=250)
+    nap_minutes_asleep = models.FloatField(max_length=250)
+    nap_minutes_light = models.FloatField(max_length=250)
+    nap_minutes_deep = models.FloatField(max_length=250)
+    nap_minutes_rem = models.FloatField(max_length=250)
+    nap_minutes_awake = models.FloatField(max_length=250)
+    nap_minutes_in_bed = models.FloatField(max_length=250)
+    nap_minutes_restless = models.FloatField(max_length=250)
+
 
     class Meta:
         db_table = 'siesta_resumen'
@@ -467,15 +469,15 @@ class Siesta_resumen(models.Model):
 class Suenio_resumen(models.Model):
     id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
     time = models.DateTimeField(null= False, blank= False)
-    main_sleep= models.BooleanField()
-    efficiency = models.FloatField(max_length=250)
-    duration= models.FloatField(max_length=250)
-    minutes_asleep = models.FloatField(max_length=250)
-    minutes_light = models.FloatField(max_length=250)
-    minutes_deep = models.FloatField(max_length=250)
-    minutes_rem = models.FloatField(max_length=250)
-    minutes_awake = models.FloatField(max_length=250)
-    minutes_in_bed = models.FloatField(max_length=250)
+    sleep_main_sleep= models.BooleanField()
+    sleep_efficiency = models.FloatField(max_length=250)
+    sleep_duration= models.FloatField(max_length=250)
+    sleep_minutes_asleep = models.FloatField(max_length=250)
+    sleep_minutes_light = models.FloatField(max_length=250)
+    sleep_minutes_deep = models.FloatField(max_length=250)
+    sleep_minutes_rem = models.FloatField(max_length=250)
+    sleep_minutes_awake = models.FloatField(max_length=250)
+    sleep_minutes_in_bed = models.FloatField(max_length=250)
 
     class Meta:
         db_table = 'suenio_resumen'

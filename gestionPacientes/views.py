@@ -185,52 +185,77 @@ def upload(request):
                 msg = sleep_nap_resumen(request,csv_file)
         except:
             msg = sleep_nap(request,csv_file)
+    elif(nom[2] == "medtronic"):
+        medtronic(request,csv_file)
     return render(request, template,{'msg': msg})
 
+def medtronic(request, csv_file):
+    print("a")
 def sleep_nap_resumen(request, csv_file):
-    sl_data = pd.read_csv(csv_file)
+    data_set = csv_file.read().decode('UTF-8')  # lee los datos
     nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
     tipo = nom[4]
-
-    sl_data.to_csv('sleep.csv')  # crea csv de calorias con los resultados del script
-    csv_file = open('sleep.csv', 'rb')  # importa datos del csv de calorias
-    data_set = csv_file.read().decode('UTF-8')  # lee los datos
-    csv_file.close()  # cierra el archivo calorias para poder eliminarlo
-    os.remove('sleep.csv')  # elimina el archivo
     io_string = io.StringIO(data_set)
     next(io_string)
     if tipo == "night":
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Suenio_resumen.objects.update_or_create(
                 time=column[2],
-                main_sleep=column[3],
-                efficiency=column[4],
-                duration=column[5],
-                minutes_asleep=column[6],
-                minutes_light=column[7],
-                minutes_deep=column[8],
-                minutes_rem=column[9],
-                minutes_awake=column[10],
-                minutes_in_bed=column[11],
                 id_user_id=request.user.paciente.user_ptr_id,
+                defaults={
+                    "sleep_main_sleep": column[3],
+                    "sleep_efficiency": column[4],
+                    "sleep_duration": column[5],
+                    "sleep_minutes_asleep": column[6],
+                    "sleep_minutes_light": column[7],
+                    "sleep_minutes_deep": column[8],
+                    "sleep_minutes_rem": column[9],
+                    "sleep_minutes_awake": column[10],
+                    "sleep_minutes_in_bed": column[11],
+                }
             )
         msg = "Resumen de sueño subido con éxito"
 
     elif tipo == "nap":
+
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-            _, created = Siesta_resumen.objects.update_or_create(
-                time=column[2],
-                main_sleep=column[3],
-                efficiency=column[4],
-                duration=column[5],
-                minutes_asleep=column[6],
-                minutes_light=column[7],
-                minutes_deep=column[8],
-                minutes_rem=column[9],
-                minutes_awake=column[10],
-                minutes_in_bed=column[11],
-                id_user_id=request.user.paciente.user_ptr_id,
-            )
+            tamanio = len(column)
+            if tamanio == 12:
+                _, created = Siesta_resumen.objects.update_or_create(
+                    time=column[2],
+                    id_user_id=request.user.paciente.user_ptr_id,
+                    defaults= {
+                        "nap_main_sleep":column[3],
+                        "nap_efficiency":column[4],
+                        "nap_duration":column[5],
+                        "nap_minutes_asleep":column[6],
+                        "nap_minutes_light":column[7],
+                        "nap_minutes_deep":column[8],
+                        "nap_minutes_rem":column[9],
+                        "nap_minutes_awake":column[10],
+                        "nap_minutes_in_bed":column[11],
+                        "nap_minutes_restless": -1,
+
+                    }
+                )
+            elif tamanio == 10:
+                _, created = Siesta_resumen.objects.update_or_create(
+                    time=column[2],
+                    id_user_id=request.user.paciente.user_ptr_id,
+                    defaults= {
+                        "nap_main_sleep":column[3],
+                        "nap_efficiency":column[4],
+                        "nap_duration":column[5],
+                        "nap_minutes_asleep":column[6],
+                        "nap_minutes_awake": column[7],
+                        "nap_minutes_restless": column[8],
+                        "nap_minutes_in_bed":column[9],
+                        "nap_minutes_light": -1,
+                        "nap_minutes_deep": -1,
+                        "nap_minutes_rem": -1,
+                    }
+                )
+
         msg = "Resumen de siesta subido con éxito"
     else:
         msg = "Error en el archivo"
@@ -297,18 +322,19 @@ def sleep_nap(request, csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Suenio.objects.update_or_create(
                 time=column[0],
-                sleep_state=column[1],
                 id_user_id=column[2],
-                )
+                defaults={"sleep_state": column[1], }
+            )
         msg = "Sueño subido con éxito"
 
     elif tipo == "nap":
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Siesta.objects.update_or_create(
                 time=column[0],
-                nap_state=column[1],
                 id_user_id=column[2],
-                )
+                defaults={"nap_state": column[1], }
+
+            )
         msg = "Siesta subida con éxito"
     else:
         msg = "Error en el archivo"
@@ -338,8 +364,10 @@ def fitbit(request,csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Calorias.objects.update_or_create(
                 time=column[0],
-                calories=column[1],
                 id_user_id=column[2],
+                defaults={
+                    "calories" : column[1],
+                }
             )
         msg = "Calorías subidas con éxito"
 
@@ -347,8 +375,8 @@ def fitbit(request,csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Ritmo_cardiaco.objects.update_or_create(
                 time=column[0],
-                heart_rate=column[1],
                 id_user_id=column[2],
+                defaults={"heart_rate": column[1],}
             )
         msg = "Ritmo cardiaco subido con éxito"
 
@@ -356,8 +384,9 @@ def fitbit(request,csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Pasos.objects.update_or_create(
                 time=column[0],
-                steps=column[1],
                 id_user_id=column[2],
+                defaults={"steps": column[1], }
+
             )
         msg = "Pasos subidos con éxito"
 
