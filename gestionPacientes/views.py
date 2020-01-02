@@ -15,7 +15,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from Glucmodel.settings import DATABASES
 
-from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta
+from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -145,6 +145,10 @@ def download(request):
             items = Siesta.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
         elif tabla == "Suenio":
             items = Suenio.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Suenio_resumen":
+            items = Suenio_resumen.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Siesta_resumen":
+            items = Siesta_resumen.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
 
         with open('items.csv', 'wb') as csv_file:
             write_csv(items, csv_file)
@@ -172,13 +176,65 @@ def upload(request):
         return render(request, template)
 
     csv_file = request.FILES['file']
-    #si la cabecera es calorias
     nom = csv_file.name.split('_')
     if nom[2] == "cals" or nom[2] == "heart" or nom[2] == "steps" :
         msg = fitbit(request,csv_file)
     elif nom[2] == "sleep":
-        msg = sleep_nap(request,csv_file)
+        try:
+            if(nom[5] == "summary.csv" or nom[6] == "summary.csv"):
+                msg = sleep_nap_resumen(request,csv_file)
+        except:
+            msg = sleep_nap(request,csv_file)
     return render(request, template,{'msg': msg})
+
+def sleep_nap_resumen(request, csv_file):
+    sl_data = pd.read_csv(csv_file)
+    nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
+    tipo = nom[4]
+
+    sl_data.to_csv('sleep.csv')  # crea csv de calorias con los resultados del script
+    csv_file = open('sleep.csv', 'rb')  # importa datos del csv de calorias
+    data_set = csv_file.read().decode('UTF-8')  # lee los datos
+    csv_file.close()  # cierra el archivo calorias para poder eliminarlo
+    os.remove('sleep.csv')  # elimina el archivo
+    io_string = io.StringIO(data_set)
+    next(io_string)
+    if tipo == "night":
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+            _, created = Suenio_resumen.objects.update_or_create(
+                time=column[2],
+                main_sleep=column[3],
+                efficiency=column[4],
+                duration=column[5],
+                minutes_asleep=column[6],
+                minutes_light=column[7],
+                minutes_deep=column[8],
+                minutes_rem=column[9],
+                minutes_awake=column[10],
+                minutes_in_bed=column[11],
+                id_user_id=request.user.paciente.user_ptr_id,
+            )
+        msg = "Resumen de sueño subido con éxito"
+
+    elif tipo == "nap":
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+            _, created = Siesta_resumen.objects.update_or_create(
+                time=column[2],
+                main_sleep=column[3],
+                efficiency=column[4],
+                duration=column[5],
+                minutes_asleep=column[6],
+                minutes_light=column[7],
+                minutes_deep=column[8],
+                minutes_rem=column[9],
+                minutes_awake=column[10],
+                minutes_in_bed=column[11],
+                id_user_id=request.user.paciente.user_ptr_id,
+            )
+        msg = "Resumen de siesta subido con éxito"
+    else:
+        msg = "Error en el archivo"
+    return msg
 
 
 def sleep_nap(request, csv_file):

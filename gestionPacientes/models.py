@@ -446,3 +446,37 @@ class Siesta(models.Model):
     class Meta:
         db_table = 'siesta'
         unique_together = (('id_user', 'time'),)
+
+class Siesta_resumen(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null= False, blank= False)
+    main_sleep= models.BooleanField()
+    efficiency = models.FloatField(max_length=250)
+    duration= models.FloatField(max_length=250)
+    minutes_asleep = models.FloatField(max_length=250)
+    minutes_light = models.FloatField(max_length=250)
+    minutes_deep = models.FloatField(max_length=250)
+    minutes_rem = models.FloatField(max_length=250)
+    minutes_awake = models.FloatField(max_length=250)
+    minutes_in_bed = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'siesta_resumen'
+        unique_together = (('id_user', 'time'),)
+
+class Suenio_resumen(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null= False, blank= False)
+    main_sleep= models.BooleanField()
+    efficiency = models.FloatField(max_length=250)
+    duration= models.FloatField(max_length=250)
+    minutes_asleep = models.FloatField(max_length=250)
+    minutes_light = models.FloatField(max_length=250)
+    minutes_deep = models.FloatField(max_length=250)
+    minutes_rem = models.FloatField(max_length=250)
+    minutes_awake = models.FloatField(max_length=250)
+    minutes_in_bed = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'suenio_resumen'
+        unique_together = (('id_user', 'time'),)
