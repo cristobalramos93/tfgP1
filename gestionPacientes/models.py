@@ -33,7 +33,7 @@ class CasosFormacion(models.Model):
     tomas_extras = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        
+
         db_table = 'casos_formacion'
 
 
@@ -61,7 +61,7 @@ class CasosSeguimiento(models.Model):
     h14 = models.CharField(max_length=45, blank=True, null=True)
 
     class Meta:
-        
+
         db_table = 'casos_seguimiento'
 
 
@@ -70,7 +70,7 @@ class DestinoDoc(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'destino_doc'
 
 
@@ -83,7 +83,7 @@ class Dietas(models.Model):
     raciones = models.FloatField(db_column='RACIONES', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'dietas'
 
 
@@ -100,7 +100,7 @@ class Documentaciones(models.Model):
     filetype = models.CharField(db_column='FILETYPE', max_length=64, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'documentaciones'
 
 
@@ -112,7 +112,7 @@ class Ejercicios(models.Model):
     type = models.IntegerField(db_column='TYPE', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'ejercicios'
 
 
@@ -123,7 +123,7 @@ class Ficherosexportados(models.Model):
     iduser = models.BigIntegerField(db_column='IDUSER', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'ficherosexportados'
 
 
@@ -133,7 +133,7 @@ class GestionpedidosArticulos(models.Model):
     precio = models.IntegerField()
 
     class Meta:
-        
+
         db_table = 'gestionpedidos_articulos'
 
 
@@ -144,7 +144,7 @@ class GestionpedidosClientes(models.Model):
     telefono = models.CharField(max_length=7)
 
     class Meta:
-        
+
         db_table = 'gestionpedidos_clientes'
 
 
@@ -154,7 +154,7 @@ class GestionpedidosPedidos(models.Model):
     entregado = models.IntegerField()
 
     class Meta:
-        
+
         db_table = 'gestionpedidos_pedidos'
 
 
@@ -167,7 +167,7 @@ class Glucemias(models.Model):
     value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'glucemias'
 
 
@@ -180,7 +180,7 @@ class Insulinas(models.Model):
     value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'insulinas'
 
 
@@ -192,7 +192,7 @@ class MensajesUsuario(models.Model):
     userid = models.BigIntegerField(blank=True, null=True)
 
     class Meta:
-        
+
         db_table = 'mensajes_usuario'
 
 
@@ -203,7 +203,7 @@ class Modelos(models.Model):
     idpaciente = models.IntegerField(db_column='IDPACIENTE')  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'modelos'
 
 
@@ -214,7 +214,7 @@ class Momentos(models.Model):
     hourto = models.SmallIntegerField(db_column='HOURTO', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'momentos'
 
 
@@ -223,7 +223,7 @@ class NivelEje(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'nivel_eje'
 
 
@@ -234,7 +234,7 @@ class Pesos(models.Model):
     peso = models.FloatField(db_column='PESO', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'pesos'
 
 
@@ -249,7 +249,7 @@ class Pruebas(models.Model):
     filetype = models.CharField(db_column='FILETYPE', max_length=64, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'pruebas'
 
 
@@ -259,7 +259,7 @@ class Recomendaciones(models.Model):
     texto = models.TextField(blank=True, null=True)
 
     class Meta:
-        
+
         db_table = 'recomendaciones'
 
 
@@ -268,7 +268,7 @@ class TipoEje(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'tipo_eje'
 
 
@@ -277,7 +277,7 @@ class TipoIns(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'tipo_ins'
 
 
@@ -286,7 +286,7 @@ class TipoPru(models.Model):
     description = models.CharField(db_column='DESCRIPTION', max_length=45)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'tipo_pru'
 
 
@@ -320,7 +320,7 @@ class Usuarios(models.Model):
     hipogluc = models.IntegerField(db_column='HIPOGLUC', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        
+
         db_table = 'usuarios'
 
 class Centro_medico(models.Model):
@@ -482,3 +482,79 @@ class Suenio_resumen(models.Model):
     class Meta:
         db_table = 'suenio_resumen'
         unique_together = (('id_user', 'time'),)
+
+#MEDTRONIC
+
+class Bg_reading(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    bg_reading_mg_dL = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'bg_reading'
+        unique_together = (('id_user', 'time'),)
+
+
+class Basal_rate(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    basal_rate_U_h = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'basal_rate'
+        unique_together = (('id_user', 'time'),)
+
+class Bolus_type(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    bolus_type = models.CharField(max_length=250)
+
+    class Meta:
+        db_table = 'bolus_type'
+        unique_together = (('id_user', 'time'),)
+
+class Bolus_volume_delivered(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    bolus_volume_delivered_U = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'bolus_volume_delivered'
+        unique_together = (('id_user', 'time'),)
+
+class Bwz_carb_ratio(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    bwz_carb_ratio_U_EX = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'bwz_carb_ratio'
+        unique_together = (('id_user', 'time'),)
+
+class Bwz_carb_input(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    bwz_carb_input_EX = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'bwz_carb_input'
+        unique_together = (('id_user', 'time'),)
+
+class Sensor_calibration(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    sensor_calibration_mg_dL = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'sensor_calibration'
+        unique_together = (('id_user', 'time'),)
+
+class Sensor_glucose(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    sensor_glucose_mg_dL = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'sensor_glucose'
+        unique_together = (('id_user', 'time'),)
+
