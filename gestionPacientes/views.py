@@ -199,11 +199,7 @@ def upload(request):
     return render(request, template,{'msg': msg,'pacientes': pacientes})
 
 def medtronic(request, csv_file,usuario):
-    if (usuario == -1):
-        id_usuario = request.user.paciente.user_ptr_id
-    else:
-        id_usuario = usuario
-    #continuar aqui
+    print("hola jaime")
 
 
 def sleep_nap_resumen(request, csv_file,usuario):
