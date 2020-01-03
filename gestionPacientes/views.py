@@ -1,25 +1,18 @@
 import csv
 import io
 import os
-from wsgiref.util import FileWrapper
-
 import numpy as np
 import pandas as pd
 from djqscsv import write_csv
-from django.forms import forms
 from django.http import HttpResponse
-# Create your views here.
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
-from Glucmodel.settings import DATABASES
-
 from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
-from django.contrib import messages
 
 
 def welcome(request):
@@ -104,8 +97,12 @@ def login(request):
                 do_login(request, user)
                 # Y le redireccionamos a la portada
                 return redirect('/')
+            else: #si el nom de usuario o contraseña es incorrecto
+                msg = "Error en el usuario o contraseña"
+                return render(request, "login.html",{'msg':msg})
 
     # Si llegamos al final renderizamos el formulario
+
     return render(request, "login.html")
 
 def logout(request):
@@ -114,13 +111,12 @@ def logout(request):
     return redirect('/')
 
 
-def file(param):
-    pass
-
-
 def download(request):
-    id_doctor = request.user.medico.user_ptr_id
-    pacientes = Paciente.objects.filter(doctor_id_id=id_doctor)
+    try:
+        if request.user.id == request.user.paciente.user_ptr_id:# si es un paciente solo se puede descargar a si mismo
+            pacientes = Paciente.objects.filter(id=request.user.id)
+    except:
+        pacientes = Paciente.objects.all()#puede descargar todos los pacientes
     if request.method == 'POST':
         first_date = request.POST['first_date']
         final_date = request.POST['final_date']
@@ -130,7 +126,7 @@ def download(request):
         first_date = datetime.strptime(first_date, format_str)
         final_date = datetime.strptime(final_date, format_str)
     else:
-        return render(request,'download.html',{'pacientes' : pacientes})
+        return render(request,'download.html',{'pacientes':pacientes})
 
     id_usuario = Paciente.objects.get(username = usuario).id
     df = pd.DataFrame(columns=['time', "id_user_id"])
@@ -167,31 +163,50 @@ def download(request):
         os.remove("final.csv")
         return response
 
-#a
 
 def upload(request):
     template = "upload.html"
+    try: #si es paceinte
+        if request.user.id == request.user.paciente.user_ptr_id:
+            pacientes = "nada"
+
+    except: # si es un medicco o investigador o admin
+        pacientes = Paciente.objects.all()
 
     if request.method == 'GET':
-        return render(request, template)
+        return render(request, template,{'pacientes' : pacientes})
 
     csv_file = request.FILES['file']
     nom = csv_file.name.split('_')
+    try:
+        usuario = request.user.paciente.user_ptr_id # si es u paciente, saco su id
+    except:# si es un  medico, el id lo saco del usuario seleccionado
+        usuario = request.POST['usuario'] #nombre del usuario
+        usuario = Paciente.objects.get(username=usuario).id
+
     if nom[2] == "cals" or nom[2] == "heart" or nom[2] == "steps" :
-        msg = fitbit(request,csv_file)
+        msg = fitbit(request,csv_file,usuario)
     elif nom[2] == "sleep":
         try:
             if(nom[5] == "summary.csv" or nom[6] == "summary.csv"):
-                msg = sleep_nap_resumen(request,csv_file)
+                msg = sleep_nap_resumen(request,csv_file,usuario)
         except:
-            msg = sleep_nap(request,csv_file)
+            msg = sleep_nap(request,csv_file,usuario)
     elif(nom[2] == "medtronic"):
-        medtronic(request,csv_file)
-    return render(request, template,{'msg': msg})
+        medtronic(request,csv_file,usuario)
+    else:
+        msg = "Error en el archivo"
+    return render(request, template,{'msg': msg,'pacientes': pacientes})
 
-def medtronic(request, csv_file):
-    print("a")
-def sleep_nap_resumen(request, csv_file):
+def medtronic(request, csv_file,usuario):
+    if (usuario == -1):
+        id_usuario = request.user.paciente.user_ptr_id
+    else:
+        id_usuario = usuario
+    #continuar aqui
+
+
+def sleep_nap_resumen(request, csv_file,usuario):
     data_set = csv_file.read().decode('UTF-8')  # lee los datos
     nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
     tipo = nom[4]
@@ -201,7 +216,7 @@ def sleep_nap_resumen(request, csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Suenio_resumen.objects.update_or_create(
                 time=column[2],
-                id_user_id=request.user.paciente.user_ptr_id,
+                id_user_id=usuario,
                 defaults={
                     "sleep_main_sleep": column[3],
                     "sleep_efficiency": column[4],
@@ -223,7 +238,7 @@ def sleep_nap_resumen(request, csv_file):
             if tamanio == 12:
                 _, created = Siesta_resumen.objects.update_or_create(
                     time=column[2],
-                    id_user_id=request.user.paciente.user_ptr_id,
+                    id_user_id=usuario,
                     defaults= {
                         "nap_main_sleep":column[3],
                         "nap_efficiency":column[4],
@@ -241,7 +256,7 @@ def sleep_nap_resumen(request, csv_file):
             elif tamanio == 10:
                 _, created = Siesta_resumen.objects.update_or_create(
                     time=column[2],
-                    id_user_id=request.user.paciente.user_ptr_id,
+                    id_user_id=usuario,
                     defaults= {
                         "nap_main_sleep":column[3],
                         "nap_efficiency":column[4],
@@ -262,7 +277,8 @@ def sleep_nap_resumen(request, csv_file):
     return msg
 
 
-def sleep_nap(request, csv_file):
+def sleep_nap(request, csv_file,usuario):
+
     nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
     tipo = nom[4]
     # Data file name
@@ -309,7 +325,7 @@ def sleep_nap(request, csv_file):
             sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')] = 'rem'
         if d >= w and d >= l and d >= r:
             sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')] = 'deep'
-    sl_treat_data = sl_treat_data.assign(id_user_id = request.user.paciente.user_ptr_id)
+    #sl_treat_data = sl_treat_data.assign(id_user_id = request.user.paciente.user_ptr_id)
 
     sl_treat_data.to_csv('sleep.csv')  # crea csv de calorias con los resultados del script
     csv_file = open('sleep.csv', 'rb')  # importa datos del csv de calorias
@@ -322,7 +338,7 @@ def sleep_nap(request, csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Suenio.objects.update_or_create(
                 time=column[0],
-                id_user_id=column[2],
+                id_user_id=usuario,
                 defaults={"sleep_state": column[1], }
             )
         msg = "Sueño subido con éxito"
@@ -331,7 +347,7 @@ def sleep_nap(request, csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Siesta.objects.update_or_create(
                 time=column[0],
-                id_user_id=column[2],
+                id_user_id=usuario,
                 defaults={"nap_state": column[1], }
 
             )
@@ -340,7 +356,8 @@ def sleep_nap(request, csv_file):
         msg = "Error en el archivo"
     return msg
 
-def fitbit(request,csv_file):
+def fitbit(request,csv_file,usuario):
+
     nom = csv_file.name.split('_') #sacamos la fecha del nombre del archivo
     tipo = nom[2]
     nom = nom[3].split('.')
@@ -351,7 +368,7 @@ def fitbit(request,csv_file):
     cal_data.set_index('time', inplace=True)
     # 5 minutes resampling
     cal_data = cal_data.resample('5T').sum()
-    cal_data = cal_data.assign(id_user_id = request.user.paciente.user_ptr_id)
+    #cal_data = cal_data.assign(id_user_id = request.user.paciente.user_ptr_id)
 
     cal_data.to_csv('calorias.csv')#crea csv de calorias con los resultados del script
     csv_file = open('calorias.csv', 'rb')#importa datos del csv de calorias
@@ -364,7 +381,7 @@ def fitbit(request,csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Calorias.objects.update_or_create(
                 time=column[0],
-                id_user_id=column[2],
+                id_user_id=usuario,
                 defaults={
                     "calories" : column[1],
                 }
@@ -375,7 +392,7 @@ def fitbit(request,csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Ritmo_cardiaco.objects.update_or_create(
                 time=column[0],
-                id_user_id=column[2],
+                id_user_id=usuario,
                 defaults={"heart_rate": column[1],}
             )
         msg = "Ritmo cardiaco subido con éxito"
@@ -384,7 +401,7 @@ def fitbit(request,csv_file):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Pasos.objects.update_or_create(
                 time=column[0],
-                id_user_id=column[2],
+                id_user_id=usuario,
                 defaults={"steps": column[1], }
 
             )

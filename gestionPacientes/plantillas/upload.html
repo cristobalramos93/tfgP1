@@ -11,6 +11,23 @@
      <div class="container-upload">
         <form  method="POST" enctype="multipart/form-data" class="form-horizontal">
         {% csrf_token %}
+            {% if request.user.id != request.user.paciente.user_ptr_id %}
+                <div class="input-group">
+                    <div class="rs-select2 js-select-simple select--no-search "  style="margin-bottom:20px;">
+                                <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label">Seleccionar Paciente: </label >
+                        <select name="usuario" required>
+                            <option value="">
+                                PACIENTE
+                            </option>
+                            {% for objeto in pacientes %}
+                                <option>{{objeto.username}}<option>
+                            {% endfor %}
+                        </select>
+                        <div class="select-dropdown"></div>
+                    </div>
+                </div>
+
+            {% endif %}
         <div class="form-group">
             <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label">File: </label>
             <div class="col-md-8">

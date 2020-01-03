@@ -57,9 +57,10 @@
                     <div class="input-group">
                         <div class="rs-select2 js-select-simple select--no-search">
                             <select name="treatment_id" required>
-                                <option value="">
+                                <option  value="">
                                     TIPO DE TRATAMIENTO*
                                 </option>
+
                                 {% for objeto in obj %}
                                     <option>{{objeto.code}}<option>
                                 {% endfor %}
