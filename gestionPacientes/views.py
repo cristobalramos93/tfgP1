@@ -25,7 +25,7 @@ def welcome(request):
     return redirect('/login')
 
 def prueba(request):
-    return render(request,"home.html")
+    return render(request,"prueba.html")
 
 
 def register(request):
@@ -123,6 +123,9 @@ def download(request):
         first_date = request.POST['first_date']
         final_date = request.POST['final_date']
         campos = request.POST.getlist("casillas[]")
+        if(len(campos) == 0):
+            msg = "Selecciona algún dato para descargar"
+            return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg})
         usuario = request.POST['usuario']
         format_str = '%d/%m/%Y'
         first_date = datetime.strptime(first_date, format_str)

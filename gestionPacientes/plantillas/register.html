@@ -48,7 +48,7 @@
                                     TIPO DE DIABETES*
                                 </option>
                                 {% for objeto in tipo_diabetes %}
-                                    <option>{{objeto.0}}<option>
+                                    <option>{{objeto.0}}</option>
                                 {% endfor %}
                             </select>
                             <div class="select-dropdown"></div>
@@ -62,7 +62,7 @@
                                 </option>
 
                                 {% for objeto in obj %}
-                                    <option>{{objeto.code}}<option>
+                                    <option>{{objeto.code}}</option>
                                 {% endfor %}
                             </select>
                             <div class="select-dropdown"></div>
@@ -74,7 +74,9 @@
                     <div class="input-group">
                         <input class="input--style-1" type="password" placeholder="REPETIR CONTRASEÑA*" name="password2" id="con2" pattern=".{6,}" title="Debe contener mínimo 6 caracteres" required>
                     </div>
-                    <div class="alert"><font color="red">{{msg}}</font></div>
+                            {% if msg != None %}
+                            <div class="alert alert-success"><font color="red">{{msg}}</font></div>
+                            {% endif %}
 
                     <div class="p-t-20">
                         <button class="btn btn--radius btn--green" type="submit">Registrar</button>
