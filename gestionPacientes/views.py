@@ -535,9 +535,9 @@ def sleep_nap(request, csv_file,usuario):
     return msg
 def free_style_sensor(request,csv_file,usuario):
 
-    gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=[x for x in range(19)])
-    gluc_data.pop('ID')
-    gluc_data.pop('Tipo de registro')
+    gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=['Hora', 'Glucosa leída (mg/dL)', 'Histórico glucosa (mg/dL)', 'Insulina de acción rápida (unidades)',
+                                                                    'Carbohidratos (raciones)','Insulina de acción lenta (unidades)',
+                                                                    'Glucosa de la tira (mg/dL)', 'Cetonas (mmol/L)'])
 
     # Convert time to time series
     gluc_data['Hora'] = pd.to_datetime(gluc_data['Hora'])
@@ -555,7 +555,8 @@ def free_style_sensor(request,csv_file,usuario):
     gluc_data_1 = gluc_data[["Glucosa leída (mg/dL)", "Histórico glucosa (mg/dL)"]].fillna(0)
     gluc_data_1 = gluc_data_1.assign(glucosa_total=0).apply(juntar_glu, axis='columns')
     gluc_data["glucosa_total"] = gluc_data_1["glucosa_total"]
-
+    gluc_data.pop("Glucosa leída (mg/dL)")
+    gluc_data.pop("Histórico glucosa (mg/dL)")
 
     gluc_data.to_csv('free.csv')#crea csv de free_style con los resultados del script
     csv_file = open('free.csv', 'rb')#importa datos del csv de free_style
