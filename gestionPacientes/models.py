@@ -558,3 +558,39 @@ class Sensor_glucose(models.Model):
         db_table = 'sensor_glucose'
         unique_together = (('id_user', 'time'),)
 
+class Insulina_rapida(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    insulina_rapida_U = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'insulina_rapida'
+        unique_together = (('id_user', 'time'),)
+
+class Insulina_lenta(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    insulina_lenta_U = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'insulina_lenta'
+        unique_together = (('id_user', 'time'),)
+
+class Glucosa_sangre(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    glucosa_sangre_mg_dL = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'glucosa_sangre'
+        unique_together = (('id_user', 'time'),)
+
+class Cetonas(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    cetonas_mmol_L = models.FloatField(max_length=250)
+
+    class Meta:
+        db_table = 'cetonas'
+        unique_together = (('id_user', 'time'),)
+

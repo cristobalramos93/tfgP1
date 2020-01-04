@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
 from gestionPacientes.models import  Bg_reading, Basal_rate, Bolus_type, Bolus_volume_delivered, Bwz_carb_input, Bwz_carb_ratio, Sensor_calibration, Sensor_glucose
+from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -552,9 +553,8 @@ def free_style_sensor(request,csv_file,usuario):
     gluc_data = gluc_data.resample('5min').mean()
 
     gluc_data_1 = gluc_data[["Glucosa leída (mg/dL)", "Histórico glucosa (mg/dL)"]].fillna(0)
-    gluc_data_1 = gluc_data.assign(glucosa_total=0).apply(juntar_glu, axis='columns')
-    gluc_data = gluc_data[["Hora", "glucosa_total"]]
-
+    gluc_data_1 = gluc_data_1.assign(glucosa_total=0).apply(juntar_glu, axis='columns')
+    gluc_data["glucosa_total"] = gluc_data_1["glucosa_total"]
 
 
     gluc_data.to_csv('free.csv')#crea csv de free_style con los resultados del script
