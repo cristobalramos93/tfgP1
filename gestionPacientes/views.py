@@ -209,6 +209,8 @@ def upload(request):
             msg = sleep_nap(request,csv_file,usuario)
     elif(nom[2] == "medtronic"):
         msg = medtronic(request,csv_file,usuario)
+    elif (nom[2] == "free"):
+        msg = free_style_sensor(request, csv_file, usuario)
     else:
         msg = "Error en el archivo"
     return render(request, template,{'msg': msg,'pacientes': pacientes})
@@ -530,6 +532,58 @@ def sleep_nap(request, csv_file,usuario):
     else:
         msg = "Error en el archivo"
     return msg
+def free_style_sensor(request,csv_file,usuario):
+
+    gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=[x for x in range(19)])
+    gluc_data.pop('ID')
+    gluc_data.pop('Tipo de registro')
+
+    # Convert time to time series
+    gluc_data['Hora'] = pd.to_datetime(gluc_data['Hora'])
+
+    # Sort data by date
+    gluc_data = gluc_data.sort_values(by=['Hora'])
+
+    # Round data to the closest five minutes
+    gluc_data['Hora'] = gluc_data['Hora'].dt.round('5min')
+    gluc_data.set_index('Hora', inplace=True)
+
+    # 5 minutes sampling
+    gluc_data = gluc_data.resample('5min').mean()
+
+    gluc_data_1 = gluc_data[["Glucosa leída (mg/dL)", "Histórico glucosa (mg/dL)"]].fillna(0)
+    gluc_data_1 = gluc_data.assign(glucosa_total=0).apply(juntar_glu, axis='columns')
+    gluc_data = gluc_data[["Hora", "glucosa_total"]]
+
+
+
+    gluc_data.to_csv('free.csv')#crea csv de free_style con los resultados del script
+    csv_file = open('free.csv', 'rb')#importa datos del csv de free_style
+    data_set = csv_file.read().decode('UTF-8')#lee los datos
+    csv_file.close()#cierra el archivo free_style para poder eliminarlo
+    os.remove('free.csv')#elimina el archivo
+    io_string = io.StringIO(data_set)
+    next(io_string)
+    for column in csv.reader(io_string, delimiter=';', quotechar="|"):  # inserta datos en la bd
+         _, created = Calorias.objects.update_or_create(
+            time=column[0],
+             id_user_id=usuario,
+            defaults={
+            }
+         )
+    msg = "Calorías subidas con éxito"
+    return msg
+
+def juntar_glu(r):
+    if (r["Glucosa leída (mg/dL)"] > 0) & (r["Histórico glucosa (mg/dL)"] > 0):
+        r.glucosa_total = (r["Glucosa leída (mg/dL)"] + r["Histórico glucosa (mg/dL)"])/2
+    elif r["Glucosa leída (mg/dL)"] > 0:
+        r.glucosa_total = r["Glucosa leída (mg/dL)"]
+    elif r["Histórico glucosa (mg/dL)"] > 0:
+        r.glucosa_total = r["Histórico glucosa (mg/dL)"]
+    else:
+        r.glucosa_total = -1
+    return r
 
 def fitbit(request,csv_file,usuario):
 
