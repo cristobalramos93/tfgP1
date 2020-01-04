@@ -161,6 +161,14 @@ def download(request):
             items = Sensor_calibration.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
         elif tabla == "Sensor_glucose":
             items = Sensor_glucose.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Insulina_rapida":
+            items = Insulina_rapida.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Insulina_lenta":
+            items = Insulina_lenta.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Glucosa_sangre":
+            items = Glucosa_sangre.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Cetonas":
+            items = Cetonas.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
 
         with open('items.csv', 'wb') as csv_file:
             write_csv(items, csv_file)
@@ -534,56 +542,98 @@ def sleep_nap(request, csv_file,usuario):
         msg = "Error en el archivo"
     return msg
 def free_style_sensor(request,csv_file,usuario):
+    try:
+        gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=['Hora', 'Glucosa leída (mg/dL)', 'Histórico glucosa (mg/dL)', 'Insulina de acción rápida (unidades)',
+                                                                        'Carbohidratos (raciones)','Insulina de acción lenta (unidades)',
+                                                                        'Glucosa de la tira (mg/dL)', 'Cetonas (mmol/L)'])
 
-    gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=['Hora', 'Glucosa leída (mg/dL)', 'Histórico glucosa (mg/dL)', 'Insulina de acción rápida (unidades)',
-                                                                    'Carbohidratos (raciones)','Insulina de acción lenta (unidades)',
-                                                                    'Glucosa de la tira (mg/dL)', 'Cetonas (mmol/L)'])
+        # Convert time to time series
+        gluc_data['Hora'] = pd.to_datetime(gluc_data['Hora'])
 
-    # Convert time to time series
-    gluc_data['Hora'] = pd.to_datetime(gluc_data['Hora'])
+        # Sort data by date
+        gluc_data = gluc_data.sort_values(by=['Hora'])
 
-    # Sort data by date
-    gluc_data = gluc_data.sort_values(by=['Hora'])
+        # Round data to the closest five minutes
+        gluc_data['Hora'] = gluc_data['Hora'].dt.round('5min')
+        gluc_data.set_index('Hora', inplace=True)
 
-    # Round data to the closest five minutes
-    gluc_data['Hora'] = gluc_data['Hora'].dt.round('5min')
-    gluc_data.set_index('Hora', inplace=True)
+        # 5 minutes sampling
+        gluc_data = gluc_data.resample('5min').mean()
 
-    # 5 minutes sampling
-    gluc_data = gluc_data.resample('5min').mean()
+        gluc_data_1 = gluc_data[["Glucosa leída (mg/dL)", "Histórico glucosa (mg/dL)"]].fillna(0)
+        gluc_data_1 = gluc_data_1.assign(Glucosa_total=0).apply(juntar_glu, axis='columns')
+        gluc_data["Glucosa_total"] = gluc_data_1["Glucosa_total"]
+        gluc_data.pop("Glucosa leída (mg/dL)")
+        gluc_data.pop("Histórico glucosa (mg/dL)")
 
-    gluc_data_1 = gluc_data[["Glucosa leída (mg/dL)", "Histórico glucosa (mg/dL)"]].fillna(0)
-    gluc_data_1 = gluc_data_1.assign(glucosa_total=0).apply(juntar_glu, axis='columns')
-    gluc_data["glucosa_total"] = gluc_data_1["glucosa_total"]
-    gluc_data.pop("Glucosa leída (mg/dL)")
-    gluc_data.pop("Histórico glucosa (mg/dL)")
-
-    gluc_data.to_csv('free.csv')#crea csv de free_style con los resultados del script
-    csv_file = open('free.csv', 'rb')#importa datos del csv de free_style
-    data_set = csv_file.read().decode('UTF-8')#lee los datos
-    csv_file.close()#cierra el archivo free_style para poder eliminarlo
-    os.remove('free.csv')#elimina el archivo
-    io_string = io.StringIO(data_set)
-    next(io_string)
-    for column in csv.reader(io_string, delimiter=';', quotechar="|"):  # inserta datos en la bd
-         _, created = Calorias.objects.update_or_create(
-            time=column[0],
-             id_user_id=usuario,
-            defaults={
-            }
-         )
-    msg = "Calorías subidas con éxito"
+        for col in gluc_data.columns:
+            col_csv = gluc_data[col].dropna()
+            col_csv.to_csv('free.csv')  # crea csv con los resultados del script
+            csv_file = open('free.csv', 'rb')  # importa datos del csv
+            data_set = csv_file.read().decode('UTF-8')  # lee los datos
+            csv_file.close()  # cierra el archivo para poder eliminarlo
+            os.remove('free.csv')  # elimina el archivo
+            io_string = io.StringIO(data_set)
+            try:
+                next(io_string)
+                if col == "Insulina de acción rápida (unidades)":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Insulina_rapida.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"insulina_rapida_U": column[1], }
+                        )
+                elif col == "Carbohidratos (raciones)":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Bwz_carb_input.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"bwz_carb_input_EX": column[1], }
+                        )
+                elif col == "Insulina de acción lenta (unidades)":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Insulina_lenta.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"insulina_lenta_U": column[1], }
+                        )
+                elif col == "Glucosa de la tira (mg/dL)":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Glucosa_sangre.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"glucosa_sangre_mg_dL": column[1], }
+                        )
+                elif col == "Cetonas (mmol/L)":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Cetonas.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"cetonas_mmol_L": column[1], }
+                        )
+                elif col == "Glucosa_total":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Sensor_glucose.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"sensor_glucose_mg_dL": column[1], }
+                        )
+                msg = "Datos de freestyle subidos con éxito"
+            except:
+                print("columna vacia")
+    except:
+        msg = "Error en el tipo de datos de freestyle"
     return msg
 
 def juntar_glu(r):
     if (r["Glucosa leída (mg/dL)"] > 0) & (r["Histórico glucosa (mg/dL)"] > 0):
-        r.glucosa_total = (r["Glucosa leída (mg/dL)"] + r["Histórico glucosa (mg/dL)"])/2
+        r.Glucosa_total = (r["Glucosa leída (mg/dL)"] + r["Histórico glucosa (mg/dL)"])/2
     elif r["Glucosa leída (mg/dL)"] > 0:
-        r.glucosa_total = r["Glucosa leída (mg/dL)"]
+        r.Glucosa_total = r["Glucosa leída (mg/dL)"]
     elif r["Histórico glucosa (mg/dL)"] > 0:
-        r.glucosa_total = r["Histórico glucosa (mg/dL)"]
+        r.Glucosa_total = r["Histórico glucosa (mg/dL)"]
     else:
-        r.glucosa_total = -1
+        r.Glucosa_total = np.nan
     return r
 
 def fitbit(request,csv_file,usuario):
