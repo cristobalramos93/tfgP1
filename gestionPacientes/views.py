@@ -150,7 +150,6 @@ def logout(request):
     # Redireccionamos a la portada
     return redirect('/')
 
-
 def download(request):
     try:
         if request.user.id == request.user.paciente.user_ptr_id:# si es un paciente solo se puede descargar a si mismo
@@ -243,6 +242,10 @@ def upload(request):
 
     csv_file = request.FILES['file']
     nom = csv_file.name.split('_')
+    extension = csv_file.name.split('.')
+    if extension[1] != 'csv':
+        return render(request, template, {'pacientes': pacientes, 'msg': "El archivo debe tener la extensión .csv"})
+
     try:
         usuario = request.user.paciente.user_ptr_id # si es u paciente, saco su id
     except:# si es un  medico, el id lo saco del usuario seleccionado
