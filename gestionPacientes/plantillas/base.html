@@ -2,130 +2,130 @@
 {% load staticfiles i18n %}
 <!DOCTYPE html>
 <html>
-    {# Make modifiable head elements #}
-    <head>
-        <title>{% block title %}Base{% endblock title %}</title>
-        <meta charset = "utf-8">
+{# Make modifiable head elements #}
+<head>
+    <title>{% block title %}Base{% endblock title %}</title>
+    <meta charset = "utf-8">
 
-      <!-- Custom fonts for this theme -->
-      <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
-      <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
-      <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
-        <!-- Theme CSS -->
-        <link href="{% static 'css/freelancer.min.css' %}" rel="stylesheet">
+    <!-- Custom fonts for this theme -->
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <!-- Theme CSS -->
+    <link href="{% static 'css/freelancer.min.css' %}" rel="stylesheet">
 
-        {% block css %}{% endblock css %}
+    {% block css %}{% endblock css %}
 
-    </head>
- <body id="page-top">
- <nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
+</head>
+<body id="page-top">
+<nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
     <div class="container">
-      <a class="navbar-brand js-scroll-trigger" href="/">Glucmodel</a>
-      <button class="navbar-toggler navbar-toggler-right text-uppercase font-weight-bold bg-primary text-white rounded" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        Menu
-        <i class="fas fa-bars"></i>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
-        <ul class="navbar-nav ml-auto">
-            {% if request.user.id == request.user.medico.user_ptr_id %}
-          <li class="nav-item mx-0 mx-lg-1">
-            <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/register">Añadir Paciente</a>
-          </li>
-            {% endif %}
+        <a class="navbar-brand js-scroll-trigger" href="/">Glucmodel</a>
+        <button class="navbar-toggler navbar-toggler-right text-uppercase font-weight-bold bg-primary text-white rounded" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                {% if request.user.id == request.user.medico.user_ptr_id %}
+                    <li class="nav-item mx-0 mx-lg-1">
+                        <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/register">Añadir Paciente</a>
+                    </li>
+                {% endif %}
 
-          <li class="nav-item mx-0 mx-lg-1">
-            <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/download">Descargar datos</a>
-          </li>
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/download">Descargar datos</a>
+                </li>
 
-            <li class="nav-item mx-0 mx-lg-1">
-            <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/upload">Subir datos</a>
-          </li>
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/upload">Subir datos</a>
+                </li>
 
-          <li class="nav-item mx-0 mx-lg-1">
-            <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/logout">Logout</a>
-          </li>
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/logout">Logout</a>
+                </li>
 
 
-        </ul>
-      </div>
+            </ul>
+        </div>
     </div>
-  </nav>
-    {# Navigation Menu #}
+</nav>
+{# Navigation Menu #}
 
 </header>
 
 
- {% block content %}
-        if you see this, something is wrong!
- {% endblock content %}
+{% block content %}
+    if you see this, something is wrong!
+{% endblock content %}
 
 
 <!-- Footer -->
-  <footer class="footer text-center">
+<footer class="footer text-center">
     <div class="container">
-      <div class="row">
+        <div class="row">
 
-        <!-- Footer Location -->
-        <div class="col-lg-4 mb-5 mb-lg-0">
-          <h4 class="text-uppercase mb-4">Direccion</h4>
-          <p class="lead mb-0">Calle del Prof. José García Santesmases,
-            <br>9, 28040 Madrid</p>
+            <!-- Footer Location -->
+            <div class="col-lg-4 mb-5 mb-lg-0">
+                <h4 class="text-uppercase mb-4">Direccion</h4>
+                <p class="lead mb-0">Calle del Prof. José García Santesmases,
+                    <br>9, 28040 Madrid</p>
+            </div>
+
+            <!-- Footer Social Icons -->
+            <div class="col-lg-4 mb-5 mb-lg-0">
+                <h4 class="text-uppercase mb-4">Around the Web</h4>
+                <a class="btn btn-outline-light btn-social mx-1" href="#">
+                    <i class="fab fa-fw fa-facebook-f"></i>
+                </a>
+                <a class="btn btn-outline-light btn-social mx-1" href="#">
+                    <i class="fab fa-fw fa-twitter"></i>
+                </a>
+                <a class="btn btn-outline-light btn-social mx-1" href="#">
+                    <i class="fab fa-fw fa-linkedin-in"></i>
+                </a>
+                <a class="btn btn-outline-light btn-social mx-1" href="#">
+                    <i class="fab fa-fw fa-dribbble"></i>
+                </a>
+            </div>
+
+            <!-- Footer About Text -->
+            <div class="col-lg-4">
+                <h4 class="text-uppercase mb-4">Sobre GlucModel</h4>
+                <p class="lead mb-0">Gluc Model crea algoritmos predictivos para gestionar la diabetes
+            </div>
+
         </div>
-
-        <!-- Footer Social Icons -->
-        <div class="col-lg-4 mb-5 mb-lg-0">
-          <h4 class="text-uppercase mb-4">Around the Web</h4>
-          <a class="btn btn-outline-light btn-social mx-1" href="#">
-            <i class="fab fa-fw fa-facebook-f"></i>
-          </a>
-          <a class="btn btn-outline-light btn-social mx-1" href="#">
-            <i class="fab fa-fw fa-twitter"></i>
-          </a>
-          <a class="btn btn-outline-light btn-social mx-1" href="#">
-            <i class="fab fa-fw fa-linkedin-in"></i>
-          </a>
-          <a class="btn btn-outline-light btn-social mx-1" href="#">
-            <i class="fab fa-fw fa-dribbble"></i>
-          </a>
-        </div>
-
-        <!-- Footer About Text -->
-        <div class="col-lg-4">
-          <h4 class="text-uppercase mb-4">Sobre GlucModel</h4>
-          <p class="lead mb-0">Gluc Model crea algoritmos predictivos para gestionar la diabetes
-        </div>
-
-      </div>
     </div>
-  </footer>
+</footer>
 
-  <!-- Copyright Section -->
-  <section class="copyright py-4 text-center text-white">
+<!-- Copyright Section -->
+<section class="copyright py-4 text-center text-white">
     <div class="container">
-      <small>Copyright &copy; GlucModel 2020</small>
+        <small>Copyright &copy; GlucModel 2020</small>
     </div>
-  </section>
+</section>
 
-  <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
-  <div class="scroll-to-top d-lg-none position-fixed ">
+<!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+<div class="scroll-to-top d-lg-none position-fixed ">
     <a class="js-scroll-trigger d-block text-center text-white rounded" href="#page-top">
-      <i class="fa fa-chevron-up"></i>
+        <i class="fa fa-chevron-up"></i>
     </a>
-  </div>
+</div>
 
-  <!-- Bootstrap core JavaScript -->
-  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-  <script src="ve{%  static 'ndor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- Bootstrap core JavaScript -->
+<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+<script src="ve{%  static 'ndor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
-  <!-- Plugin JavaScript -->
-  <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+<!-- Plugin JavaScript -->
+<script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
 
-  <!-- Contact Form JavaScript -->
-  <script src="{%  static 'js/jqBootstrapValidation.js' %}"></script>
-  <script src="{% static 'js/contact_me.js' %}"></script>
+<!-- Contact Form JavaScript -->
+<script src="{%  static 'js/jqBootstrapValidation.js' %}"></script>
+<script src="{% static 'js/contact_me.js' %}"></script>
 
-  <!-- Custom scripts for this template -->
-  <script src="{% static 'js/freelancer.min.js' %}"></script>
+<!-- Custom scripts for this template -->
+<script src="{% static 'js/freelancer.min.js' %}"></script>
 
 {% block js %}{%  endblock %}
 

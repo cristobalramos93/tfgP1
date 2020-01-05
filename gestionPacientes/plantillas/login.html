@@ -22,41 +22,41 @@
 {% block content %}
 
 
-<div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
-    <div class="wrapper wrapper--w680">
-        <div class="card card-1">
-            <div class="card-heading"></div>
-            <div class="card-body">
+    <div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
+        <div class="wrapper wrapper--w680">
+            <div class="card card-1">
+                <div class="card-heading"></div>
+                <div class="card-body">
                     <div class="form-group">
 
-                <h2 class="title">Login</h2>
-                <form  method="POST">
-                        {% csrf_token %}
-                    <div class="input-group">
-                        <input class="input--style-1" type="text" placeholder="NAME" name="username">
+                        <h2 class="title">Login</h2>
+                        <form  method="POST">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input class="input--style-1" type="text" placeholder="NAME" name="username">
+                            </div>
+                            <div class="input-group">
+                                <input class="input--style-1" type="password" placeholder="PASSWORD" name="password">
+                            </div>
+                            <div class="p-t-20">
+                                <button class="btn btn--radius btn--green" type="submit">Submit</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="input-group">
-                        <input class="input--style-1" type="password" placeholder="PASSWORD" name="password">
-                    </div>
-                    <div class="p-t-20">
-                        <button class="btn btn--radius btn--green" type="submit">Submit</button>
-                    </div>
-                </form>
-                    </div>
-                            {% if msg != None %}
-                            <div class="alert alert-success"><font color="red">{{msg}}</font></div>
-                            {% endif %}
+                    {% if msg != None %}
+                        <div class="alert alert-success"><font color="red">{{msg}}</font></div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
 {% endblock content %}
 
 {% block js %}
 
-<!-- Jquery JS-->
+    <!-- Jquery JS-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <!-- Vendor JS-->
     <script src="{% static 'vendor/select2/select2.min.js' %}"></script>

@@ -3,46 +3,46 @@
 {% block title %}Home{% endblock title %}
 {% block content %}
 
-<header class="masthead bg-primary text-white text-center">
-    <div class="container d-flex align-items-center flex-column">
+    <header class="masthead bg-primary text-white text-center">
+        <div class="container d-flex align-items-center flex-column">
 
-      <!-- Masthead Avatar Image -->
-      <img class="masthead-avatar mb-5" src="{% static 'img/avataaars.svg' %}" alt="">
+            <!-- Masthead Avatar Image -->
+            <img class="masthead-avatar mb-5" src="{% static 'img/avataaars.svg' %}" alt="">
 
-      <!-- Masthead Heading -->
-      <h1 class="masthead-heading text-uppercase mb-0">Hola {{request.user.username}}</h1>
+            <!-- Masthead Heading -->
+            <h1 class="masthead-heading text-uppercase mb-0">Hola {{request.user.username}}</h1>
 
 
-        {% if request.user.id == request.user.medico.user_ptr_id %}
-        <form action='register' method='GET'>
-            <button class="btn btn-xl btn-outline-light" type='submit'> Registrar un paciente</button>
-        </form>
+            {% if request.user.id == request.user.medico.user_ptr_id %}
+                <form action='register' method='GET'>
+                    <button class="btn btn-xl btn-outline-light" type='submit'> Registrar un paciente</button>
+                </form>
 
-        {% endif %}
-        {% if request.user.id == request.user.medico.user_ptr_id %}
-        <form action='download' method='GET'>
-            <button class="btn btn-xl btn-outline-light" type='submit'> Descargar Pacientes</button>
-        </form>
-        {% endif %}
+            {% endif %}
+            {% if request.user.id == request.user.medico.user_ptr_id %}
+                <form action='download' method='GET'>
+                    <button class="btn btn-xl btn-outline-light" type='submit'> Descargar Pacientes</button>
+                </form>
+            {% endif %}
 
             <form action='upload' method='GET'>
-            <button class="btn btn-xl btn-outline-light" type='submit'> Subir Pacientes</button>
-        </form>
+                <button class="btn btn-xl btn-outline-light" type='submit'> Subir Pacientes</button>
+            </form>
 
 
-      <!-- Icon Divider -->
-      <div class="divider-custom divider-light">
-        <div class="divider-custom-line"></div>
-        <div class="divider-custom-icon">
-          <i class="fas fa-star"></i>
+            <!-- Icon Divider -->
+            <div class="divider-custom divider-light">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="divider-custom-line"></div>
+            </div>
+
+            <!-- Masthead Subheading -->
+            <p class="masthead-subheading font-weight-light mb-0">Graphic Artist - Web Designer - Illustrator</p>
+
         </div>
-        <div class="divider-custom-line"></div>
-      </div>
-
-      <!-- Masthead Subheading -->
-      <p class="masthead-subheading font-weight-light mb-0">Graphic Artist - Web Designer - Illustrator</p>
-
-    </div>
-  </header>
+    </header>
 
 {% endblock content %}

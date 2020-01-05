@@ -1,48 +1,81 @@
 {% extends "base.html" %}
-{% block title %}Subir-Info{% endblock title %}
+{% load staticfiles i18n %}
+
+{% block title %}Descarga{% endblock title %}
+
 {% block css %}
+
+    <!-- Icons font CSS-->
+    <link href="{% static 'vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/font-awesome-4.7/css/font-awesome.min.css' %}" rel="stylesheet" media="all">
+    <!-- Font special for pages-->
+
+    <!-- Vendor CSS-->
+    <link href="{%  static 'vendor/select2/select2.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/datepicker/daterangepicker.css' %}" rel="stylesheet" media="all">
+
+    <!-- Main CSS-->
+    <link href="{% static 'css/main.css' %}" rel="stylesheet" media="all">
     <style>
-    .container-upload{
-        margin-top: 8em;
-    }
+
     </style>
 {% endblock css %}
+
 {% block content %}
-     <div class="container-upload">
-        <form  method="POST" enctype="multipart/form-data" class="form-horizontal">
-        {% csrf_token %}
-            {% if request.user.id != request.user.paciente.user_ptr_id %}
-                <div class="input-group">
-                    <div class="rs-select2 js-select-simple select--no-search "  style="margin-bottom:20px;">
-                        <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label">Seleccionar Paciente: </label >
-                        <select name="usuario" required>
-                            <option value="">
-                                PACIENTE
-                            </option>
-                            {% for objeto in pacientes %}
-                                <option>{{objeto.username}}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="select-dropdown"></div>
-                    </div>
-                </div>
-
-            {% endif %}
-        <div class="form-group">
-            <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label">File: </label>
-            <div class="col-md-8">
-                <input type="file" name="file" id="file" required="True" class="form-control">
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-md-3 col-sm-3 col-xs-12 col-md-offset-3" style="margin-bottom:10px;">
-                 <button class="btn btn-primary"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload </button>
-            </div>
-        </div>
-                            {% if msg != None %}
-                            <div class="alert alert-success"><font color="red">{{msg}}</font></div>
+    <div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
+        <div class="wrapper wrapper--w680">
+            <div class="card card-1">
+                <div class="card-heading"></div>
+                <div class="card-body">
+                    <h2 class="title">Subir datos</h2>
+                    <form  method="POST" enctype="multipart/form-data" class="form-horizontal">
+                        {% csrf_token %}
+                        <div>
+                            {% if request.user.id != request.user.paciente.user_ptr_id %}
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <select name="usuario" class="form-control" required>
+                                            <option value="">
+                                                SELECCIONAR PACIENTE
+                                            </option>
+                                            {% for objeto in pacientes %}
+                                                <option>{{objeto.username}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="select-dropdown"></div>
+                                    </div>
+                                </div>
                             {% endif %}
-        </form>
-     </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <input type="file" name="file" id="file" required="True" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-md-offset-3" style="margin-bottom:10px;">
+                                <button class="btn btn-primary"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload </button>
+                            </div>
+                        </div>
+                        {% if msg != None %}
+                            <div class="alert alert-success"><font color="red">{{msg}}</font></div>
+                        {% endif %}
 
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock content %}
+
+{% block js %}
+    <!-- Jquery JS-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <!-- Vendor JS-->
+    <script src="{% static 'vendor/select2/select2.min.js' %}"></script>
+    <script src="{% static 'vendor/datepicker/moment.min.js' %}"></script>
+    <script src="{% static 'vendor/datepicker/daterangepicker.js' %}"></script>
+
+    <!-- Main JS-->
+    <script src="{% static 'js/global.js' %}"></script>
+{% endblock js %}

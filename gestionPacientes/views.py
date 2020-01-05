@@ -25,8 +25,45 @@ def welcome(request):
     return redirect('/login')
 
 def prueba(request):
-    return render(request,"prueba.html")
+    template = "prueba.html"
+    try:  # si es paceinte
+        if request.user.id == request.user.paciente.user_ptr_id:
+            pacientes = "nada"
 
+    except:  # si es un medicco o investigador o admin
+        pacientes = Paciente.objects.all()
+
+    if request.method == 'GET':
+        return render(request, template, {'pacientes': pacientes})
+
+    csv_file = request.FILES['file']
+    nom = csv_file.name.split('_')
+    extension = csv_file.name.split('.')
+    if extension[1] != 'csv':
+        return render(request, template, {'pacientes': pacientes, 'msg': "El archivo debe tener la extensión .csv"})
+
+
+    try:
+        usuario = request.user.paciente.user_ptr_id  # si es u paciente, saco su id
+    except:  # si es un  medico, el id lo saco del usuario seleccionado
+        usuario = request.POST['usuario']  # nombre del usuario
+        usuario = Paciente.objects.get(username=usuario).id
+
+    if nom[2] == "cals" or nom[2] == "heart" or nom[2] == "steps":
+        msg = fitbit(request, csv_file, usuario)
+    elif nom[2] == "sleep":
+        try:
+            if (nom[5] == "summary.csv" or nom[6] == "summary.csv"):
+                msg = sleep_nap_resumen(request, csv_file, usuario)
+        except:
+            msg = sleep_nap(request, csv_file, usuario)
+    elif (nom[2] == "medtronic"):
+        msg = medtronic(request, csv_file, usuario)
+    elif (nom[2] == "free"):
+        msg = free_style_sensor(request, csv_file, usuario)
+    else:
+        msg = "Error en el archivo"
+    return render(request, template, {'msg': msg, 'pacientes': pacientes})
 
 def register(request):
 
@@ -76,7 +113,8 @@ def register(request):
         except Exception as e:
             print("no peso")
 
-        return redirect("/")
+        return render(request, 'register.html',
+                      {'obj': obj, 'tipo_diabetes': tipo_diabetes, 'msg': "Usuario subido con éxito"})
 
     else:
         return render(request,'register.html',{'obj': obj, 'tipo_diabetes' : tipo_diabetes})

@@ -22,131 +22,136 @@
 {% endblock css %}
 
 {% block content %}
-<div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
-    <div class="wrapper wrapper--w680">
-        <div class="card card-1">
-            <div class="card-heading"></div>
-            <div class="card-body">
-                <h2 class="title">Descarga de Paciente</h2>
-                <form  method="POST">
+    <div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
+        <div class="wrapper wrapper--w680">
+            <div class="card card-1">
+                <div class="card-heading"></div>
+                <div class="card-body">
+                    <h2 class="title">Descarga de Paciente</h2>
+                    <form  method="POST">
                         {% csrf_token %}
-                    <div class="input-group">
-                        <div class="rs-select2 js-select-simple select--no-search">
-                            <select name="usuario" required>
-                                <option value="">
-                                    PACIENTE*
-                                </option>
-                                {% for objeto in pacientes %}
-                                    <option>{{objeto.username}}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="select-dropdown"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                            <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE INICIO*" name="first_date"required>
-                            <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
-                        </div>
-                        <div class="input-group">
-                            <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE FINAL*" name="final_date"required>
-                            <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
+                        <div class="form-group">
+                            <div class="rs-select2 js-select-simple select--no-search">
+                                <select name="usuario" required>
+                                    <option value="">
+                                        SELECCIONAR PACIENTE
+                                    </option>
+                                    {% for objeto in pacientes %}
+                                        <option>{{objeto.username}}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md-5">
-                                <div class="d-block my-3">
-                                    <div class="custom-control custom-radio">
-                                        <input id="Calorias" name="casillas[]" type="checkbox" class="custom-control-input" value="Calorias">
-                                        <label class="custom-control-label" for="Calorias">Calorias</label>
-                                   </div>
-                                   <div class="custom-control custom-radio">
-                                        <input id="Pasos" name="casillas[]" type="checkbox" class="custom-control-input" value="Pasos" >
-                                        <label class="custom-control-label" for="Pasos">Pasos</label>
-                                   </div>
-                                   <div class="custom-control custom-radio">
-                                        <input id="Ritmo_cardiaco" name="casillas[]" type="checkbox" class="custom-control-input" value="Ritmo_cardiaco">
-                                        <label class="custom-control-label" for="Ritmo_cardiaco">Ritmo cardiaco</label>
-                                   </div>
-                                   <div class="custom-control custom-radio">
-                                        <input id="Siesta" name="casillas[]" type="checkbox" class="custom-control-input" value="Siesta">
-                                        <label class="custom-control-label" for="Siesta">Siesta</label>
-                                   </div>
-                                   <div class="custom-control custom-radio">
-                                        <input id="Suenio" name="casillas[]" type="checkbox" class="custom-control-input" value="Suenio" >
-                                        <label class="custom-control-label" for="Suenio">Sueño</label>
-                                   </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE INICIO*" name="first_date"required>
+                                        <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-md-offset-4">
 
-                                   <div class="custom-control custom-radio">
-                                        <input id="Siesta_resumen" name="casillas[]" type="checkbox" class="custom-control-input" value="Siesta_resumen">
-                                        <label class="custom-control-label" for="Siesta_resumen">Resumen siesta</label>
-                                   </div>
-                                   <div class="custom-control custom-radio">
-                                        <input id="Bg_reading" name="casillas[]" type="checkbox" class="custom-control-input" value="Bg_reading">
-                                        <label class="custom-control-label" for="Bg_reading">Lectura de BG</label>
-                                   </div>
-                                   <div class="custom-control custom-radio">
-                                        <input id="Basal_rate" name="casillas[]" type="checkbox" class="custom-control-input" value="Basal_rate" >
-                                        <label class="custom-control-label" for="Basal_rate">Ratio basal</label>
-                                   </div>
-                                   <div class="custom-control custom-radio">
-                                        <input id="Bolus_type" name="casillas[]" type="checkbox" class="custom-control-input" value="Bolus_type">
-                                        <label class="custom-control-label" for="Bolus_type">Tipo de bolus</label>
-                                   </div>
+                                <div class="input-group">
+                                    <input class="input--style-1 js-datepicker" type="text" placeholder="FECHA DE FINAL*" name="final_date"required>
+                                    <i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="custom-control custom-radio">
+                                    <input id="Calorias" name="casillas[]" type="checkbox" class="custom-control-input" value="Calorias">
+                                    <label class="custom-control-label" for="Calorias">Calorias</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="Pasos" name="casillas[]" type="checkbox" class="custom-control-input" value="Pasos" >
+                                    <label class="custom-control-label" for="Pasos">Pasos</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="Ritmo_cardiaco" name="casillas[]" type="checkbox" class="custom-control-input" value="Ritmo_cardiaco">
+                                    <label class="custom-control-label" for="Ritmo_cardiaco">Ritmo cardiaco</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="Siesta" name="casillas[]" type="checkbox" class="custom-control-input" value="Siesta">
+                                    <label class="custom-control-label" for="Siesta">Siesta</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="Suenio" name="casillas[]" type="checkbox" class="custom-control-input" value="Suenio" >
+                                    <label class="custom-control-label" for="Suenio">Sueño</label>
+                                </div>
+
+                                <div class="custom-control custom-radio">
+                                    <input id="Siesta_resumen" name="casillas[]" type="checkbox" class="custom-control-input" value="Siesta_resumen">
+                                    <label class="custom-control-label" for="Siesta_resumen">Resumen siesta</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="Bg_reading" name="casillas[]" type="checkbox" class="custom-control-input" value="Bg_reading">
+                                    <label class="custom-control-label" for="Bg_reading">Lectura de BG</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="Basal_rate" name="casillas[]" type="checkbox" class="custom-control-input" value="Basal_rate" >
+                                    <label class="custom-control-label" for="Basal_rate">Ratio basal</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="Bolus_type" name="casillas[]" type="checkbox" class="custom-control-input" value="Bolus_type">
+                                    <label class="custom-control-label" for="Bolus_type">Tipo de bolus</label>
                                 </div>
                             </div>
 
                             <div class="col-md-6 col-md-offset-4">
-                               <div class="custom-control custom-radio">
+                                <div class="custom-control custom-radio">
                                     <input id="Bolus_volume" name="casillas[]" type="checkbox" class="custom-control-input" value="Bolus_volume">
                                     <label class="custom-control-label" for="Bolus_volume">Volumen de bolus</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Bwz_carb_ratio" name="casillas[]" type="checkbox" class="custom-control-input" value="Bwz_carb_ratio" >
                                     <label class="custom-control-label" for="Bwz_carb_ratio">Ratio de hidratos de carbono</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Bwz_carb_input" name="casillas[]" type="checkbox" class="custom-control-input" value="Bwz_carb_input">
                                     <label class="custom-control-label" for="Bwz_carb_input">Input de hidratos de carbono</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Sensor_calibration" name="casillas[]" type="checkbox" class="custom-control-input" value="Sensor_calibration">
                                     <label class="custom-control-label" for="Sensor_calibration">Calibracion de glucosa</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Sensor_glucose" name="casillas[]" type="checkbox" class="custom-control-input" value="Sensor_glucose" >
                                     <label class="custom-control-label" for="Sensor_glucose">Glucosa</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Glucosa_sangre" name="casillas[]" type="checkbox" class="custom-control-input" value="Glucosa_sangre">
                                     <label class="custom-control-label" for="Glucosa_sangre">Glucosa en sangre</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Insulina_rapida" name="casillas[]" type="checkbox" class="custom-control-input" value="Insulina_rapida">
                                     <label class="custom-control-label" for="Insulina_rapida">Insulina de acción rápida</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Insulina_lenta" name="casillas[]" type="checkbox" class="custom-control-input" value="Insulina_lenta" >
                                     <label class="custom-control-label" for="Insulina_lenta">Insulina de acción lenta</label>
-                               </div>
-                               <div class="custom-control custom-radio">
+                                </div>
+                                <div class="custom-control custom-radio">
                                     <input id="Cetonas" name="casillas[]" type="checkbox" class="custom-control-input" value="Cetonas">
                                     <label class="custom-control-label" for="Cetonas">Cetonas</label>
-                               </div>
+                                </div>
                             </div>
                         </div>
-                           <div class="p-t-20">
-                                <button class="btn btn--radius btn--green" type="submit">Descargar</button>
-                           </div>
-                            </div>
-                            {% if msg != None %}
+                        <div class="p-t-20">
+                            <button class="btn btn--radius btn--green" type="submit">Descargar</button>
+                        </div>
+                        {% if msg != None %}
                             <div class="alert alert-success"><font color="red">{{msg}}</font></div>
-                            {% endif %}
+                        {% endif %}
 
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock content %}
 
 {% block js %}
