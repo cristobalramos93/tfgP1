@@ -163,7 +163,11 @@ def download(request):
         if(len(campos) == 0):
             msg = "Selecciona algún dato para descargar"
             return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg})
-        usuario = request.POST['usuario']
+        try:
+            usuario = request.POST['usuario']
+        except:
+            usuario = Paciente.objects.get(id=request.user.id).username
+
         format_str = '%d/%m/%Y'
         first_date = datetime.strptime(first_date, format_str)
         final_date = datetime.strptime(final_date, format_str)

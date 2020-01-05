@@ -30,19 +30,21 @@
                     <h2 class="title">Descarga de Paciente</h2>
                     <form  method="POST">
                         {% csrf_token %}
-                        <div class="form-group">
-                            <div class="rs-select2 js-select-simple select--no-search">
-                                <select name="usuario" required>
-                                    <option value="">
-                                        SELECCIONAR PACIENTE
-                                    </option>
-                                    {% for objeto in pacientes %}
-                                        <option>{{objeto.username}}</option>
-                                    {% endfor %}
-                                </select>
-                                <div class="select-dropdown"></div>
+                        {% if request.user.id != request.user.paciente.user_ptr_id %}
+                            <div class="form-group">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    <select name="usuario" required>
+                                        <option value="">
+                                            SELECCIONAR PACIENTE
+                                        </option>
+                                        {% for objeto in pacientes %}
+                                            <option>{{objeto.username}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="select-dropdown"></div>
+                                </div>
                             </div>
-                        </div>
+                        {% endif %}
                         <div class="row">
                             <div class="col-md-5">
                                 <div class="form-group">
