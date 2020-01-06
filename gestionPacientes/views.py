@@ -15,6 +15,7 @@ from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Gl
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
+from django.db.models import Min, Max
 
 
 def welcome(request):
@@ -150,10 +151,33 @@ def logout(request):
     # Redireccionamos a la portada
     return redirect('/')
 
+def buscar_menor(request,id_paciente):
+    aux_min = Calorias.objects.filter(id_user_id=request.user.id).aggregate(Min('time'))
+    aux_max = Calorias.objects.filter(id_user_id=request.user.id).aggregate(Max('time'))
+    menor = aux_min
+    mayor = aux_max
+    aux_min = Ritmo_cardiaco.objects.filter(id_user_id=request.user.id).aggregate(Min('time'))
+    aux_max = Ritmo_cardiaco.objects.filter(id_user_id=request.user.id).aggregate(Max('time'))
+    if aux_min < menor:
+        menor = aux_min
+    if aux_max > mayor:
+        mayor = aux_max
+    aux_min = Pasos.objects.filter(id_user_id=request.user.id).aggregate(Min('time'))
+    aux_max = Pasos.objects.filter(id_user_id=request.user.id).aggregate(Max('time'))
+    if aux_min < menor:
+        menor = aux_min
+    if aux_max > mayor:
+        mayor = aux_max
+
+
+
 def download(request):
     try:
         if request.user.id == request.user.paciente.user_ptr_id:# si es un paciente solo se puede descargar a si mismo
             pacientes = Paciente.objects.filter(id=request.user.id)
+            #aqui busco su fecha
+            #fe = Calorias.objects.filter(id_user_id=request.user.id).aggregate(Min('time')) fecha minima de la tabla calorias de este id
+
     except:
         pacientes = Paciente.objects.all()#puede descargar todos los pacientes
     if request.method == 'POST':
