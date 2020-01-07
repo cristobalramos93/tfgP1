@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
 from gestionPacientes.models import  Bg_reading, Basal_rate, Bolus_type, Bolus_volume_delivered, Bwz_carb_input, Bwz_carb_ratio, Sensor_calibration, Sensor_glucose
-from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre
+from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre, Peso
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -25,46 +25,30 @@ def welcome(request):
     # En otro caso redireccionamos al login
     return redirect('/login')
 
-def prueba(request):
-    template = "prueba.html"
-    try:  # si es paceinte
-        if request.user.id == request.user.paciente.user_ptr_id:
-            pacientes = "nada"
+def new_password(request):
+    template = 'new_password.html'
+    if request.method == "POST":
+        # Recuperamos las credenciales validadas
+        old_pas = request.POST['old_pas']
+        new_pas = request.POST['new_pas']
+        new_pas2 = request.POST['new_pas2']
+        user = authenticate(username=request.user.username, password=old_pas)
+        if user is None: #si no existe este usuario
+            return render(request,template,{'msg': "La contraseña es erronea"})
+        elif new_pas != new_pas2:
+            return render(request, template,{'msg': "La nueva contraseña debe coincidir"})
+        elif new_pas == old_pas:
+            return render(request, template,{'msg': "La contraseña nueva no puede ser la misma que la anterior"})
 
-    except:  # si es un medicco o investigador o admin
-        pacientes = Paciente.objects.all()
+        else:
+            p = Paciente.objects.get(id = request.user.id)
+            p.password = make_password(new_pas)
+            p.save()
+            do_login(request, user)
+            return render(request,template,{'msg': "Contraseña cambiada con éxito"})
 
-    if request.method == 'GET':
-        return render(request, template, {'pacientes': pacientes})
-
-    csv_file = request.FILES['file']
-    nom = csv_file.name.split('_')
-    extension = csv_file.name.split('.')
-    if extension[1] != 'csv':
-        return render(request, template, {'pacientes': pacientes, 'msg': "El archivo debe tener la extensión .csv"})
-
-
-    try:
-        usuario = request.user.paciente.user_ptr_id  # si es u paciente, saco su id
-    except:  # si es un  medico, el id lo saco del usuario seleccionado
-        usuario = request.POST['usuario']  # nombre del usuario
-        usuario = Paciente.objects.get(username=usuario).id
-
-    if nom[2] == "cals" or nom[2] == "heart" or nom[2] == "steps":
-        msg = fitbit(request, csv_file, usuario)
-    elif nom[2] == "sleep":
-        try:
-            if (nom[5] == "summary.csv" or nom[6] == "summary.csv"):
-                msg = sleep_nap_resumen(request, csv_file, usuario)
-        except:
-            msg = sleep_nap(request, csv_file, usuario)
-    elif (nom[2] == "medtronic"):
-        msg = medtronic(request, csv_file, usuario)
-    elif (nom[2] == "free"):
-        msg = free_style_sensor(request, csv_file, usuario)
     else:
-        msg = "Error en el archivo"
-    return render(request, template, {'msg': msg, 'pacientes': pacientes})
+        return render(request, template)
 
 def register(request):
 
@@ -86,6 +70,9 @@ def register(request):
         treatment_id = Tratamiento.objects.get(code = treatment_id)
         treatment_id = treatment_id.id
 
+        if Paciente.objects.filter(username = email).count():
+            return render(request,"register.html",{'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "El paciente " + email + " ya existe"})
+
         if password1 and password2 and password1 != password2:
             return render(request, 'register.html', {'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "Las contraseñas deben ser iguales"})
 
@@ -105,10 +92,10 @@ def register(request):
             paciente_peso = Paciente.objects.get(username=email)
             paciente_peso = paciente_peso.user_ptr_id
 
-            peso = Pesos(
+            peso = Peso(
                 peso = weight,
-                iduser= paciente_peso,
-                date = datetime.now()
+                id_user_id= paciente_peso,
+                time = datetime.now()
             )
             peso.save()
         except Exception as e:
@@ -237,7 +224,8 @@ def download(request):
             items = Glucosa_sangre.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
         elif tabla == "Cetonas":
             items = Cetonas.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-
+        elif tabla == "Peso":
+            items = Peso.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
         with open('items.csv', 'wb') as csv_file:
             write_csv(items, csv_file)
         df_aux = pd.read_csv("items.csv")

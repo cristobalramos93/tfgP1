@@ -17,17 +17,17 @@
                 <form action='register' method='GET'>
                     <button class="btn btn-xl btn-outline-light" type='submit'> Registrar un paciente</button>
                 </form>
-
-            {% endif %}
-            {% if request.user.id == request.user.medico.user_ptr_id %}
                 <form action='download' method='GET'>
                     <button class="btn btn-xl btn-outline-light" type='submit'> Descargar Pacientes</button>
                 </form>
             {% endif %}
 
-            <form action='upload' method='GET'>
-                <button class="btn btn-xl btn-outline-light" type='submit'> Subir Pacientes</button>
-            </form>
+            {% if request.user.id == request.user.paciente.user_ptr_id %}
+                <form action='new_password' method='GET'>
+                    <button class="btn btn-xl btn-outline-light" type='submit'> Cambiar Contraseña</button>
+                </form>
+            {% endif %}
+
 
 
             <!-- Icon Divider -->
