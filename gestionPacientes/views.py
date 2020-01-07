@@ -139,23 +139,107 @@ def logout(request):
     return redirect('/')
 
 def buscar_menor(request,id_paciente):
-    aux_min = Calorias.objects.filter(id_user_id=request.user.id).aggregate(Min('time'))
-    aux_max = Calorias.objects.filter(id_user_id=request.user.id).aggregate(Max('time'))
-    menor = aux_min
-    mayor = aux_max
-    aux_min = Ritmo_cardiaco.objects.filter(id_user_id=request.user.id).aggregate(Min('time'))
-    aux_max = Ritmo_cardiaco.objects.filter(id_user_id=request.user.id).aggregate(Max('time'))
-    if aux_min < menor:
-        menor = aux_min
-    if aux_max > mayor:
-        mayor = aux_max
-    aux_min = Pasos.objects.filter(id_user_id=request.user.id).aggregate(Min('time'))
-    aux_max = Pasos.objects.filter(id_user_id=request.user.id).aggregate(Max('time'))
-    if aux_min < menor:
-        menor = aux_min
-    if aux_max > mayor:
-        mayor = aux_max
+    #SOLO LA CAGA SI LA PRIMERA TABLA ESTA VACIA
+    menor = datetime.max
+    menor = menor.isoformat()
+    mayor = datetime.min
+    #HABRIA QUE HACER QUE TENGA EL MISMO FORMATO PARA QUE SE PUEDAN COMPARAR
 
+    aux = Calorias.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None:
+        menor = aux['min_date']
+        mayor = aux['max_date']
+    aux = Ritmo_cardiaco.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Pasos.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Suenio.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Siesta.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Suenio_resumen.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Bg_reading.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Basal_rate.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Bolus_type.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Bolus_volume_delivered.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Bwz_carb_ratio.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux= Bwz_carb_input.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Sensor_calibration.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Sensor_glucose.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Insulina_rapida.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Insulina_lenta.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Glucosa_sangre.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Cetonas.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    aux = Peso.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
+    if aux['min_date'] != None and aux['min_date'] < menor:
+        menor = aux['min_date']
+        if aux['max_date'] > mayor:
+            mayor = aux['max_date']
+    return mayor, menor
 
 
 def download(request):
@@ -163,7 +247,9 @@ def download(request):
         if request.user.id == request.user.paciente.user_ptr_id:# si es un paciente solo se puede descargar a si mismo
             pacientes = Paciente.objects.filter(id=request.user.id)
             #aqui busco su fecha
-            #fe = Calorias.objects.filter(id_user_id=request.user.id).aggregate(Min('time')) fecha minima de la tabla calorias de este id
+            mayor, menor = buscar_menor(request, request.user.id)
+            mayor = mayor.strftime("%d-%m-%Y")
+            menor = menor.strftime("%d-%m-%Y")
 
     except:
         pacientes = Paciente.objects.all()#puede descargar todos los pacientes
