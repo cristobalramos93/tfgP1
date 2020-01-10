@@ -325,7 +325,7 @@ def download(request):
 
     with open('final.csv') as myfile:
         response = HttpResponse(myfile, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename = datos.csv'
+        response['Content-Disposition'] = 'attachment; filename ='+ str(id_usuario) +'_'+ usuario + '.csv'
         os.remove("final.csv")
         return response
 
@@ -343,6 +343,7 @@ def upload(request):
         return render(request, template,{'pacientes' : pacientes})
 
     csv_file = request.FILES['file']
+    tipo_archivo = request.POST['tipo_archivo'] #nombre del usuario
     nom = csv_file.name.split('_')
     extension = csv_file.name.split('.')
     if extension[1] != 'csv':
@@ -354,17 +355,15 @@ def upload(request):
         usuario = request.POST['usuario'] #nombre del usuario
         usuario = Paciente.objects.get(username=usuario).id
 
-    if nom[2] == "cals" or nom[2] == "heart" or nom[2] == "steps" :
+    if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
         msg = fitbit(request,csv_file,usuario)
-    elif nom[2] == "sleep":
-        try:
-            if(nom[5] == "summary.csv" or nom[6] == "summary.csv"):
-                msg = sleep_nap_resumen(request,csv_file,usuario)
-        except:
-            msg = sleep_nap(request,csv_file,usuario)
-    elif(nom[2] == "medtronic"):
+    elif tipo_archivo == "FITBIT SUEÑO RESUMEN" or tipo_archivo == "FITBIT SIESTA RESUMEN":
+        msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
+    elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
+        msg = sleep_nap(request,csv_file,usuario,tipo_archivo)
+    elif(tipo_archivo == "MEDTRONIC"):
         msg = medtronic(request,csv_file,usuario)
-    elif (nom[2] == "free"):
+    elif (tipo_archivo == "FREE STYLE SENSOR"):
         msg = free_style_sensor(request, csv_file, usuario)
     else:
         msg = "Error en el archivo"
@@ -538,13 +537,13 @@ def medtronic(request, csv_file,usuario):
 
     return msg
 
-def sleep_nap_resumen(request, csv_file,usuario):
+def sleep_nap_resumen(request, csv_file,usuario,tipo_archivo):
     data_set = csv_file.read().decode('UTF-8')  # lee los datos
     nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
     tipo = nom[4]
     io_string = io.StringIO(data_set)
     next(io_string)
-    if tipo == "night":
+    if tipo_archivo == "FITBIT SUEÑO RESUMEN":
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Suenio_resumen.objects.update_or_create(
                 time=column[2],
@@ -563,7 +562,7 @@ def sleep_nap_resumen(request, csv_file,usuario):
             )
         msg = "Resumen de sueño subido con éxito"
 
-    elif tipo == "nap":
+    elif tipo_archivo == "FITBIT SIESTA RESUMEN":
 
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             tamanio = len(column)
@@ -609,7 +608,7 @@ def sleep_nap_resumen(request, csv_file,usuario):
     return msg
 
 
-def sleep_nap(request, csv_file,usuario):
+def sleep_nap(request, csv_file,usuario,tipo_archivo):
 
     nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
     tipo = nom[4]
@@ -666,7 +665,7 @@ def sleep_nap(request, csv_file,usuario):
     os.remove('sleep.csv')  # elimina el archivo
     io_string = io.StringIO(data_set)
     next(io_string)
-    if tipo == "night.csv":
+    if tipo_archivo == "FITBIT SUEÑO":
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Suenio.objects.update_or_create(
                 time=column[0],
@@ -675,7 +674,7 @@ def sleep_nap(request, csv_file,usuario):
             )
         msg = "Sueño subido con éxito"
 
-    elif tipo == "nap":
+    elif tipo == "FITBIT SIESTA":
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Siesta.objects.update_or_create(
                 time=column[0],

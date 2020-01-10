@@ -65,8 +65,9 @@
                         <div class="row">
                             <div class="col-md-5">
                                 <div class="custom-control custom-radio">
-                                    <input id="Calorias" name="casillas[]" type="checkbox" class="custom-control-input" value="Calorias">
+                                    <input onclick="checkbox_text()" id="Calorias" name="casillas[]" type="checkbox" class="custom-control-input" value="Calorias">
                                     <label class="custom-control-label" for="Calorias">Calorias</label>
+                                    <p id="text" style="display:none">Checkbox is CHECKED!</p>
                                 </div>
                                 <div class="custom-control custom-radio">
                                     <input id="Pasos" name="casillas[]" type="checkbox" class="custom-control-input" value="Pasos" >
@@ -167,6 +168,8 @@
     <script src="{% static 'vendor/select2/select2.min.js' %}"></script>
     <script src="{% static 'vendor/datepicker/moment.min.js' %}"></script>
     <script src="{% static 'vendor/datepicker/daterangepicker.js' %}"></script>
+    <script src="{% static 'vendor/datepicker/checkbox.js' %}"></script>
+
 
     <!-- Main JS-->
     <script src="{% static 'js/global.js' %}"></script>
