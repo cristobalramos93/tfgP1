@@ -603,3 +603,11 @@ class Peso(models.Model):
         db_table = 'peso'
         unique_together = (('id_user', 'time'),)
 
+class Hito_roche(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    hito_roche = models.CharField(max_length=250)
+
+    class Meta:
+        db_table = 'hito_roche'
+        unique_together = (('id_user', 'time'),)

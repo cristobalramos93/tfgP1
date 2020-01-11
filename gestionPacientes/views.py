@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
 from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
 from gestionPacientes.models import  Bg_reading, Basal_rate, Bolus_type, Bolus_volume_delivered, Bwz_carb_input, Bwz_carb_ratio, Sensor_calibration, Sensor_glucose
-from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre, Peso
+from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre, Peso, Hito_roche
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -312,6 +312,8 @@ def download(request):
             items = Cetonas.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
         elif tabla == "Peso":
             items = Peso.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        elif tabla == "Hito_roche":
+            items = Hito_roche.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
         with open('items.csv', 'wb') as csv_file:
             write_csv(items, csv_file)
         df_aux = pd.read_csv("items.csv")
@@ -354,22 +356,102 @@ def upload(request):
     except:# si es un  medico, el id lo saco del usuario seleccionado
         usuario = request.POST['usuario'] #nombre del usuario
         usuario = Paciente.objects.get(username=usuario).id
-   # try:
-    if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
-        msg = fitbit(request,csv_file,usuario)
-    elif tipo_archivo == "FITBIT RESUMEN SUEÑO" or tipo_archivo == "FITBIT RESUMEN SIESTA":
-        msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
-    elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
-        msg = sleep_nap(request,csv_file,usuario,tipo_archivo)
-    elif(tipo_archivo == "MEDTRONIC"):
-        msg = medtronic(request,csv_file,usuario)
-    elif (tipo_archivo == "FREE STYLE SENSOR"):
-        msg = free_style_sensor(request, csv_file, usuario)
-    elif (tipo_archivo == "ROCHE"):
-        print("rellenar")
-    #except:
+    try:
+        if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
+            msg = fitbit(request,csv_file,usuario)
+        elif tipo_archivo == "FITBIT RESUMEN SUEÑO" or tipo_archivo == "FITBIT RESUMEN SIESTA":
+            msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
+        elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
+            msg = sleep_nap(request,csv_file,usuario,tipo_archivo)
+        elif(tipo_archivo == "MEDTRONIC"):
+            msg = medtronic(request,csv_file,usuario)
+        elif (tipo_archivo == "FREE STYLE SENSOR"):
+            msg = free_style_sensor(request, csv_file, usuario)
+        elif (tipo_archivo == "ROCHE"):
+            msg = roche(request, csv_file, usuario)
+    except:
         msg = "Los datos no corresponden con el nombre seleccionado"
     return render(request, template,{'msg': msg,'pacientes': pacientes})
+
+def roche(request, csv_file,usuario):
+    try:
+        roche = pd.read_csv(csv_file, sep=";", encoding="ISO-8859-1", usecols=["Fecha", "Hora", "Hito", "Glucemia",
+                                                                        "Tipo de Bolo", "Unidades", "Dosis Basal (UI/H)",
+                                                                        "Eventos S.I."],
+                            parse_dates={'Time': ['Fecha', 'Hora']}, dayfirst=True)
+
+        roche['Time'] = roche['Time'].dt.round('5min')
+
+        roche.set_index('Time', inplace=True)
+
+        roche.sort_index(inplace=True)
+
+        roche.drop_duplicates(inplace=True)
+
+        roche["Dosis Basal (UI/H)"].loc[roche["Eventos S.I."] == "Parada"] = 0
+
+        roche_str = roche[["Hito", "Tipo de Bolo", "Eventos S.I."]]
+        roche_int = roche[["Glucemia", "Unidades", "Dosis Basal (UI/H)"]]
+        # Cuando el valor de "Eventos S.I." es Parada dosis basal a 0
+        roche_int = roche.resample('5T').mean()
+
+        roche = roche_int.merge(roche_str, left_index=True, right_index=True, how="outer")
+
+        roche['Dosis Basal (UI/H)'] = roche['Dosis Basal (UI/H)'] / 12
+        aux_br = roche['Dosis Basal (UI/H)'][0]
+        for i in range(1, roche.shape[0]):
+            if np.isnan(roche['Dosis Basal (UI/H)'][i]):
+                roche.iloc[i, roche.columns.get_loc('Dosis Basal (UI/H)')] = aux_br
+            else:
+                aux_br = roche.iloc[i, roche.columns.get_loc('Dosis Basal (UI/H)')]
+        roche.pop("Eventos S.I.")
+
+        roche.to_csv('roche.csv')  # crea csv con los resultados del script
+        csv_file = open('roche.csv', 'rb')  # importa datos del csv
+        data_set = csv_file.read().decode('UTF-8')  # lee los datos
+        csv_file.close()  # cierra el archivo para poder eliminarlo
+        os.remove('roche.csv')  # elimina el archivo
+        io_string = io.StringIO(data_set)
+        next(io_string)
+        #"Hito", "Glucemia","Tipo de Bolo", "Unidades", "Dosis Basal (UI/H)"
+        try:
+            for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                if column[1] != "":
+                    _, created = Glucosa_sangre.objects.update_or_create(
+                        time=column[0],
+                        id_user_id=usuario,
+                        defaults={"glucosa_sangre_mg_dL": column[1], }
+                    )
+                if column[2] != "":
+                    _, created = Bwz_carb_input.objects.update_or_create(
+                        time=column[0],
+                        id_user_id=usuario,
+                        defaults={"bwz_carb_input_EX": column[2], }
+                    )
+                if column[3] != "":
+                    _, created = Basal_rate.objects.update_or_create(
+                        time=column[0],
+                        id_user_id=usuario,
+                        defaults={"basal_rate_U_h": column[3], }
+                    )
+                if column[4] != "":
+                    _, created = Hito_roche.objects.update_or_create(
+                        time=column[0],
+                        id_user_id=usuario,
+                        defaults={"hito_roche": column[4], }
+                    )
+                if column[5] != "":
+                    _, created = Bolus_type.objects.update_or_create(
+                        time=column[0],
+                        id_user_id=usuario,
+                        defaults={"bolus_type": column[5], }
+                    )
+            msg = "Datos de la bomba de Roche subidos con exito"
+        except:
+            msg = "Error en la subida de datos de la bomba de Roche"
+    except:
+        msg = "Error en el tratamiento de datos de la bomba de Roche"
+    return msg
 
 def medtronic(request, csv_file,usuario):
     # Obtain the row of data division if exists
