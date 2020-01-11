@@ -47,7 +47,7 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-md-12">
-                                        <select name="tipo_archivo" class="form-control" required>
+                                        <select name="tipo_archivo" class="form-control" onchange="mostrarAlerta(this)" required>
                                             <option value="">
                                                 TIPO DE ARCHIVO
                                             </option>
@@ -98,4 +98,9 @@
 
     <!-- Main JS-->
     <script src="{% static 'js/global.js' %}"></script>
+    <script>
+    function mostrarAlerta(tipo) {
+        alert("Asegurate de seleccionar el tipo de archivo de " + tipo.options[tipo.selectedIndex].text);
+    }
+    </script>
 {% endblock js %}

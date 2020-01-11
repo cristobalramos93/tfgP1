@@ -354,10 +354,10 @@ def upload(request):
     except:# si es un  medico, el id lo saco del usuario seleccionado
         usuario = request.POST['usuario'] #nombre del usuario
         usuario = Paciente.objects.get(username=usuario).id
-
+   # try:
     if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
         msg = fitbit(request,csv_file,usuario)
-    elif tipo_archivo == "FITBIT SUEÑO RESUMEN" or tipo_archivo == "FITBIT SIESTA RESUMEN":
+    elif tipo_archivo == "FITBIT RESUMEN SUEÑO" or tipo_archivo == "FITBIT RESUMEN SIESTA":
         msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
     elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
         msg = sleep_nap(request,csv_file,usuario,tipo_archivo)
@@ -365,8 +365,10 @@ def upload(request):
         msg = medtronic(request,csv_file,usuario)
     elif (tipo_archivo == "FREE STYLE SENSOR"):
         msg = free_style_sensor(request, csv_file, usuario)
-    else:
-        msg = "Error en el archivo"
+    elif (tipo_archivo == "ROCHE"):
+        print("rellenar")
+    #except:
+        msg = "Los datos no corresponden con el nombre seleccionado"
     return render(request, template,{'msg': msg,'pacientes': pacientes})
 
 def medtronic(request, csv_file,usuario):
@@ -376,7 +378,7 @@ def medtronic(request, csv_file,usuario):
     medtron_data.drop('Index', axis=1, inplace=True)
     str_index = medtron_data['Date'].str.find('Date').idxmax()
 
-    if medtron_data['Date'][str_index] == 'Date':
+    if len(medtron_data) != (str_index + 1):
         # Load first data set
         medtron_data_1 = pd.read_csv('medtron.csv', engine='python',
                                      skipfooter=medtron_data.shape[0] - str_index + 3,
@@ -396,6 +398,7 @@ def medtronic(request, csv_file,usuario):
         # 5 minutes resampling
         medtron_data_1 = medtron_data_1.resample('5T').mean()
         # Add data to basal rate
+        medtron_data_1['Basal Rate (U/h)'] = medtron_data_1['Basal Rate (U/h)']/12
         aux_br = medtron_data_1['Basal Rate (U/h)'][0]
         for i in range(1, medtron_data_1.shape[0]):
             if np.isnan(medtron_data_1['Basal Rate (U/h)'][i]):
@@ -432,7 +435,7 @@ def medtronic(request, csv_file,usuario):
         medtron_data_2 = medtron_data_2.resample('5T').mean()
     else:
         # Load first data set
-        medtron_data_1 = pd.read_csv('medtron.csv', engine='python', skiprows=6,
+        medtron_data_1 = pd.read_csv('medtron.csv', engine='python',
                                      skipfooter=medtron_data.shape[0] - str_index + 3,
                                      usecols=['Date', 'Time', 'BG Reading (mg/dL)', 'Basal Rate (U/h)',
                                               'Bolus Volume Delivered (U)', 'BWZ Carb Ratio (U/Ex)',
@@ -450,6 +453,7 @@ def medtronic(request, csv_file,usuario):
         # 5 minutes resampling
         medtron_data_1 = medtron_data_1.resample('5T').mean()
         # Add data to basal rate
+        medtron_data_1['Basal Rate (U/h)'] = medtron_data_1['Basal Rate (U/h)'] / 12
         aux_br = medtron_data_1['Basal Rate (U/h)'][0]
         for i in range(1, medtron_data_1.shape[0]):
             if np.isnan(medtron_data_1['Basal Rate (U/h)'][i]):
@@ -543,7 +547,7 @@ def sleep_nap_resumen(request, csv_file,usuario,tipo_archivo):
     tipo = nom[4]
     io_string = io.StringIO(data_set)
     next(io_string)
-    if tipo_archivo == "FITBIT SUEÑO RESUMEN":
+    if tipo_archivo == "FITBIT RESUMEN SUEÑO":
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Suenio_resumen.objects.update_or_create(
                 time=column[2],
@@ -562,7 +566,7 @@ def sleep_nap_resumen(request, csv_file,usuario,tipo_archivo):
             )
         msg = "Resumen de sueño subido con éxito"
 
-    elif tipo_archivo == "FITBIT SIESTA RESUMEN":
+    elif tipo_archivo == "FITBIT RESUMEN SIESTA":
 
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             tamanio = len(column)
