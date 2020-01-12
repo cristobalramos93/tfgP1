@@ -365,6 +365,8 @@ class Paciente(User):
     treatment = models.ForeignKey(Tratamiento, on_delete=models.PROTECT,null = True)
     start_date = models.DateField(null = True, blank = True)
     doctor_id = models.ForeignKey(Medico, on_delete=models.PROTECT)
+    first_date = models.DateTimeField(null = True, blank= True, help_text="Primera fecha con datos del paciente")
+    last_date = models.DateTimeField(null=True, blank=True, help_text="Ultima fecha con datos del paciente")
 
     def __str__(self):
         return self.username 

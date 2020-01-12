@@ -281,46 +281,7 @@ def download(request):
     id_usuario = Paciente.objects.get(username = usuario).id
     df = pd.DataFrame(columns=['time', "id_user_id"])
     for tabla in campos:
-        if tabla == "Calorias":
-            items = Calorias.objects.filter(id_user_id = id_usuario,time__gte=first_date, time__lte= final_date)
-        elif tabla == "Pasos":
-            items = Pasos.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Ritmo_cardiaco":
-            items = Ritmo_cardiaco.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Siesta":
-            items = Siesta.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Suenio":
-            items = Suenio.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Suenio_resumen":
-            items = Suenio_resumen.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Siesta_resumen":
-            items = Siesta_resumen.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Bg_reading":
-            items = Bg_reading.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Basal_rate":
-            items = Basal_rate.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Bolus_type":
-            items = Bolus_type.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Bolus_volume":
-            items = Bolus_volume_delivered.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Bwz_carb_ratio":
-            items = Bwz_carb_ratio.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Sensor_calibration":
-            items = Sensor_calibration.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Sensor_glucose":
-            items = Sensor_glucose.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Insulina_rapida":
-            items = Insulina_rapida.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Insulina_lenta":
-            items = Insulina_lenta.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Glucosa_sangre":
-            items = Glucosa_sangre.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Cetonas":
-            items = Cetonas.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Peso":
-            items = Peso.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
-        elif tabla == "Hito_roche":
-            items = Hito_roche.objects.filter(id_user_id=id_usuario, time__gte=first_date, time__lte=final_date)
+        items = eval(tabla).objects.filter(id_user_id = id_usuario,time__gte=first_date, time__lte= final_date)
         with open('items.csv', 'wb') as csv_file:
             write_csv(items, csv_file)
         df_aux = pd.read_csv("items.csv")
@@ -376,17 +337,29 @@ def upload(request):
         usuario = Paciente.objects.get(username=usuario).id
     try:
         if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
-            msg = fitbit(request,csv_file,usuario)
+            msg, fecha_min, fecha_max = fitbit(request,csv_file,usuario)
         elif tipo_archivo == "FITBIT RESUMEN SUEÑO" or tipo_archivo == "FITBIT RESUMEN SIESTA":
             msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
         elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
-            msg = sleep_nap(request,csv_file,usuario,tipo_archivo)
+            msg, fecha_min, fecha_max = sleep_nap(request,csv_file,usuario,tipo_archivo)
         elif(tipo_archivo == "MEDTRONIC"):
-            msg = medtronic(request,csv_file,usuario)
+            msg, fecha_min, fecha_max = medtronic(request,csv_file,usuario)
         elif (tipo_archivo == "FREE STYLE SENSOR"):
-            msg = free_style_sensor(request, csv_file, usuario)
+            msg, fecha_min, fecha_max = free_style_sensor(request, csv_file, usuario)
         elif (tipo_archivo == "ROCHE"):
-            msg = roche(request, csv_file, usuario)
+            msg, fecha_min, fecha_max = roche(request, csv_file, usuario)
+
+        #Guarda las fechas maximas y minimas de cada paciente al insertas datos en la BD
+        paciente = Paciente.objects.get(user_ptr_id=usuario)
+        paciente_fecha_min = paciente.first_date
+        paciente_fecha_max = paciente.last_date
+        if (paciente_fecha_min is None) or (fecha_min < paciente_fecha_min):
+            paciente.first_date = fecha_min
+            paciente.save()
+        if (paciente_fecha_max is None) or (fecha_max > paciente_fecha_max):
+            paciente.last_date = fecha_max
+            paciente.save()
+
     except:
         msg = "Los datos no corresponden con el nombre seleccionado"
     return render(request, template,{'msg': msg,'pacientes': pacientes})
@@ -424,6 +397,9 @@ def roche(request, csv_file,usuario):
                 aux_br = roche.iloc[i, roche.columns.get_loc('Dosis Basal (UI/H)')]
         roche.pop("Eventos S.I.")
 
+        fecha_min = roche.index.min()
+        fecha_max = roche.index.max()
+
         roche.to_csv('roche.csv')  # crea csv con los resultados del script
         csv_file = open('roche.csv', 'rb')  # importa datos del csv
         data_set = csv_file.read().decode('UTF-8')  # lee los datos
@@ -431,7 +407,6 @@ def roche(request, csv_file,usuario):
         os.remove('roche.csv')  # elimina el archivo
         io_string = io.StringIO(data_set)
         next(io_string)
-        #"Hito", "Glucemia","Tipo de Bolo", "Unidades", "Dosis Basal (UI/H)"
         try:
             for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
                 if column[1] != "":
@@ -469,7 +444,7 @@ def roche(request, csv_file,usuario):
             msg = "Error en la subida de datos de la bomba de Roche"
     except:
         msg = "Error en el tratamiento de datos de la bomba de Roche"
-    return msg
+    return msg, fecha_min, fecha_max
 
 def medtronic(request, csv_file,usuario):
     # Obtain the row of data division if exists
@@ -562,6 +537,9 @@ def medtronic(request, csv_file,usuario):
                 aux_br = medtron_data_1.iloc[i, medtron_data_1.columns.get_loc('Basal Rate (U/h)')]
         medtron_data_2 = None
 
+    fecha_min = medtron_data_1.index.min()
+    fecha_max = medtron_data_1.index.max()
+
     for col in medtron_data_1.columns:
         col_csv = medtron_data_1[col].dropna()
         col_csv.to_csv('medtron.csv')  # crea csv con los resultados del script
@@ -639,7 +617,7 @@ def medtronic(request, csv_file,usuario):
     else:
         msg = "Datos de la bomba de medtronic subidos con exito"
 
-    return msg
+    return msg, fecha_min, fecha_max
 
 def sleep_nap_resumen(request, csv_file,usuario,tipo_archivo):
     data_set = csv_file.read().decode('UTF-8')  # lee los datos
@@ -762,6 +740,9 @@ def sleep_nap(request, csv_file,usuario,tipo_archivo):
             sl_treat_data.iloc[i, sl_treat_data.columns.get_loc('Estado')] = 'deep'
     #sl_treat_data = sl_treat_data.assign(id_user_id = request.user.paciente.user_ptr_id)
 
+    fecha_min = sl_treat_data.index.min()
+    fecha_max = sl_treat_data.index.max()
+
     sl_treat_data.to_csv('sleep.csv')  # crea csv de calorias con los resultados del script
     csv_file = open('sleep.csv', 'rb')  # importa datos del csv de calorias
     data_set = csv_file.read().decode('UTF-8')  # lee los datos
@@ -778,7 +759,7 @@ def sleep_nap(request, csv_file,usuario,tipo_archivo):
             )
         msg = "Sueño subido con éxito"
 
-    elif tipo == "FITBIT SIESTA":
+    elif tipo_archivo == "FITBIT SIESTA":
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
             _, created = Siesta.objects.update_or_create(
                 time=column[0],
@@ -789,7 +770,7 @@ def sleep_nap(request, csv_file,usuario,tipo_archivo):
         msg = "Siesta subida con éxito"
     else:
         msg = "Error en el archivo"
-    return msg
+    return msg, fecha_min, fecha_max
 def free_style_sensor(request,csv_file,usuario):
     try:
         gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=['Hora', 'Glucosa leída (mg/dL)', 'Histórico glucosa (mg/dL)', 'Insulina de acción rápida (unidades)',
@@ -814,6 +795,9 @@ def free_style_sensor(request,csv_file,usuario):
         gluc_data["Glucosa_total"] = gluc_data_1["Glucosa_total"]
         gluc_data.pop("Glucosa leída (mg/dL)")
         gluc_data.pop("Histórico glucosa (mg/dL)")
+
+        fecha_min = gluc_data.index.min()
+        fecha_max = gluc_data.index.max()
 
         for col in gluc_data.columns:
             col_csv = gluc_data[col].dropna()
@@ -872,7 +856,7 @@ def free_style_sensor(request,csv_file,usuario):
                 print("columna vacia")
     except:
         msg = "Error en el tipo de datos de freestyle"
-    return msg
+    return msg, fecha_min, fecha_max
 
 def juntar_glu(r):
     if (r["Glucosa leída (mg/dL)"] > 0) & (r["Histórico glucosa (mg/dL)"] > 0):
@@ -898,6 +882,9 @@ def fitbit(request,csv_file,usuario):
     # 5 minutes resampling
     cal_data = cal_data.resample('5T').sum()
     #cal_data = cal_data.assign(id_user_id = request.user.paciente.user_ptr_id)
+
+    fecha_min = cal_data.index.min()
+    fecha_max = cal_data.index.max()
 
     cal_data.to_csv('calorias.csv')#crea csv de calorias con los resultados del script
     csv_file = open('calorias.csv', 'rb')#importa datos del csv de calorias
@@ -939,7 +926,7 @@ def fitbit(request,csv_file,usuario):
     else:
         msg = "Error en el archivo"
 
-    return msg
+    return msg, fecha_min, fecha_max
 #a
 
 
