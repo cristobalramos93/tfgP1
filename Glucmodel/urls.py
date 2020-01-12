@@ -26,5 +26,4 @@ urlpatterns = [
     path('register/', views.register),
     path('download/', views.download),
     path('upload/', views.upload),
-
 ]

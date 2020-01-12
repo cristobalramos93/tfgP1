@@ -38,8 +38,15 @@
                             <div class="input-group">
                                 <input class="input--style-1" type="password" placeholder="PASSWORD" name="password">
                             </div>
-                            <div class="p-t-20">
-                                <button class="btn btn--radius btn--green" type="submit">Submit</button>
+                            <div class="row">
+                                <div class="col-md-5">
+                                        <button class="btn btn--radius btn--green" type="submit">Entrar</button>
+                                </div>
+                                <div class="col-md-6 col-md-offset">
+                                    <div>
+                                        <button class="btn btn--radius btn--green" type="button" onclick="olvidado()">He olvidado la contraseña</button>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -65,6 +72,10 @@
 
     <!-- Main JS-->
     <script src="{% static 'js/global.js' %}"></script>
-
+    <script>
+    function olvidado() {
+        alert("Si has olvidado la contraseña, envíanos un correo a la dirección: glucmodel@ucm.es");
+    }
+    </script>
 {% endblock js %}
 

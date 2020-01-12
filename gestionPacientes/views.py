@@ -16,6 +16,13 @@ from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
 from django.db.models import Min, Max
+from django.core.mail import EmailMessage
+
+
+def enviar_correo(usuario, contrasenia):
+    body = "Has sido registrado en Glucmodel\n USUARIO: " + usuario + "\n CONTRASEÑA: " + contrasenia
+    email = EmailMessage('Registro Glucmodel', body, to=[usuario])
+    email.send()
 
 
 def welcome(request):
@@ -100,7 +107,7 @@ def register(request):
             peso.save()
         except Exception as e:
             print("no peso")
-
+        enviar_correo(email,password1)
         return render(request, 'register.html',
                       {'obj': obj, 'tipo_diabetes': tipo_diabetes, 'msg': "Usuario subido con éxito"})
 
@@ -258,7 +265,7 @@ def download(request):
         final_date = request.POST['final_date']
         campos = request.POST.getlist("casillas[]")
         if(len(campos) == 0):
-            msg = "Selecciona algún dato para descargar"
+            msg = "Selecciona algún dato"
             return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg})
         try:
             usuario = request.POST['usuario']
@@ -323,13 +330,24 @@ def download(request):
         os.remove('items.csv')
     df = df.set_index("time", drop=True)
     df = df.sort_index()
-    df.to_csv("final.csv")
-
-    with open('final.csv') as myfile:
-        response = HttpResponse(myfile, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename ='+ str(id_usuario) +'_'+ usuario + '.csv'
-        os.remove("final.csv")
-        return response
+    if 'ver' in request.POST:
+        disenio = '{% extends "base.html" %}\n'
+        disenio += "{% load staticfiles i18n %}\n"
+        disenio += "{% block title %}Ver Datos{% endblock title %}"
+        disenio += "{% block content %}\n"
+        tabla = df.to_html(classes='table table-striped table-hover')
+        disenio += tabla
+        disenio += "{% endblock content %}"
+        with open("gestionPacientes/plantillas/table.html", "w") as file:
+            file.write(disenio)
+        return render(request,"table.html")
+    else: #si es descargar
+        df.to_csv("final.csv")
+        with open('final.csv') as myfile:
+            response = HttpResponse(myfile, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename ='+ str(id_usuario) +'_'+ usuario + '.csv'
+            os.remove("final.csv")
+            return response
 
 
 def upload(request):

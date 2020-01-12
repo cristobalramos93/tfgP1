@@ -151,8 +151,17 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="p-t-20">
-                            <button class="btn btn--radius btn--green" type="submit">Descargar</button>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="p-t-20">
+                                    <button name ="descarga" class="btn btn--radius btn--green" type="submit">Descargar Datos</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-md-offset-4">
+                                <div class="p-t-20">
+                                    <button name ="ver" class="btn btn--radius btn--green" type="submit">Ver Datos</button>
+                                </div>
+                            </div>
                         </div>
                         {% if msg != None %}
                             <div class="alert alert-success"><font color="red">{{msg}}</font></div>
