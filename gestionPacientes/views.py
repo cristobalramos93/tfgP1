@@ -9,6 +9,11 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.backends.backend_template import FigureCanvas
+from matplotlib.figure import Figure
+from mpld3 import fig_to_html
+
 from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
 from gestionPacientes.models import  Bg_reading, Basal_rate, Bolus_type, Bolus_volume_delivered, Bwz_carb_input, Bwz_carb_ratio, Sensor_calibration, Sensor_glucose
 from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre, Peso, Hito_roche
@@ -234,8 +239,11 @@ def download(request):
     elif 'grafico' in request.POST:
         df.pop('id_user_id')#no quiero mostrar el id en el grafico
         df.plot()
-        #plt.show()
-        plt.savefig('grafico.png')
+
+        #plt.savefig('grafico.png')
+        return render(request, 'grafico.html',{'response': plt} )
+
+
     return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
 
 
