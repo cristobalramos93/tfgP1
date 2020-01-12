@@ -15,8 +15,8 @@ from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Gl
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
-from django.db.models import Min, Max
 from django.core.mail import EmailMessage
+import matplotlib.pyplot as plt
 
 
 def enviar_correo(usuario, contrasenia):
@@ -145,128 +145,46 @@ def logout(request):
     # Redireccionamos a la portada
     return redirect('/')
 
-def buscar_menor(request,id_paciente):
-    #SOLO LA CAGA SI LA PRIMERA TABLA ESTA VACIA
-    menor = datetime.max
-    menor = menor.isoformat()
-    mayor = datetime.min
-    #HABRIA QUE HACER QUE TENGA EL MISMO FORMATO PARA QUE SE PUEDAN COMPARAR
-
-    aux = Calorias.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None:
-        menor = aux['min_date']
-        mayor = aux['max_date']
-    aux = Ritmo_cardiaco.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Pasos.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Suenio.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Siesta.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Suenio_resumen.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Bg_reading.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Basal_rate.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Bolus_type.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Bolus_volume_delivered.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Bwz_carb_ratio.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux= Bwz_carb_input.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Sensor_calibration.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Sensor_glucose.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Insulina_rapida.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Insulina_lenta.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Glucosa_sangre.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Cetonas.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    aux = Peso.objects.filter(id_user_id=id_paciente).aggregate(min_date=Min('time'), max_date=Max('time'))
-    if aux['min_date'] != None and aux['min_date'] < menor:
-        menor = aux['min_date']
-        if aux['max_date'] > mayor:
-            mayor = aux['max_date']
-    return mayor, menor
-
 
 def download(request):
     try:
         if request.user.id == request.user.paciente.user_ptr_id:# si es un paciente solo se puede descargar a si mismo
             pacientes = Paciente.objects.filter(id=request.user.id)
             #aqui busco su fecha
-            mayor, menor = buscar_menor(request, request.user.id)
-            mayor = mayor.strftime("%d-%m-%Y")
-            menor = menor.strftime("%d-%m-%Y")
+            menor = request.user.paciente.first_date
+            mayor = request.user.paciente.last_date
+            fecha = "Existen registros de la fecha " + str(menor) + " a la fecha " + str(mayor)
+
 
     except:
         pacientes = Paciente.objects.all()#puede descargar todos los pacientes
+        fecha = None
     if request.method == 'POST':
-        first_date = request.POST['first_date']
+        first_date = request.POST['first_date'] #esto es solo para ver si se ha completado el formulario, si no se ha completado significa que solo has puesto el nombre de usuario, y va a calcular sus registros
+
+        if 'usuario' in request.POST and first_date == "": #si has seleccionado un usuario
+            msg = None
+            usuario = request.POST['usuario']
+            fecha_min = Paciente.objects.get(username=usuario).first_date
+            fecha_max = Paciente.objects.get(username=usuario).last_date
+
+            if(fecha_min == None):
+                fecha = None
+                msg = "No existen datos de este usuario"
+                return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha,'usuario':usuario})
+
+            else:
+                fecha_min = fecha_min.strftime("%d-%m-%Y") #lo paso a string con el formato que queremos
+                fecha_max = fecha_max.strftime("%d-%m-%Y")
+                fecha = "Existen registros de la fecha " + fecha_min + " a la fecha " + fecha_max
+                return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha,'usuario':usuario})
+
+        #first_date = request.POST['first_date']
         final_date = request.POST['final_date']
         campos = request.POST.getlist("casillas[]")
         if(len(campos) == 0):
             msg = "Selecciona algún dato"
-            return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg})
+            return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha})
         try:
             usuario = request.POST['usuario']
         except:
@@ -276,7 +194,7 @@ def download(request):
         first_date = datetime.strptime(first_date, format_str)
         final_date = datetime.strptime(final_date, format_str)
     else:
-        return render(request,'download.html',{'pacientes':pacientes})
+        return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
 
     id_usuario = Paciente.objects.get(username = usuario).id
     df = pd.DataFrame(columns=['time', "id_user_id"])
@@ -294,21 +212,28 @@ def download(request):
     if 'ver' in request.POST:
         disenio = '{% extends "base.html" %}\n'
         disenio += "{% load staticfiles i18n %}\n"
-        disenio += "{% block title %}Ver Datos{% endblock title %}"
+        disenio += "{% block title %}Ver Datos{% endblock title %}\n"
         disenio += "{% block content %}\n"
         tabla = df.to_html(classes='table table-striped table-hover')
         disenio += tabla
+        disenio += "\n"
         disenio += "{% endblock content %}"
         with open("gestionPacientes/plantillas/table.html", "w") as file:
             file.write(disenio)
         return render(request,"table.html")
-    else: #si es descargar
+    elif 'descarga' in request.POST: #si es descargar
         df.to_csv("final.csv")
         with open('final.csv') as myfile:
             response = HttpResponse(myfile, content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename ='+ str(id_usuario) +'_'+ usuario + '.csv'
             os.remove("final.csv")
             return response
+    elif 'grafico' in request.POST:
+        df.pop('id_user_id')#no quiero mostrar el id en el grafico
+        df.plot()
+        #plt.show()
+        plt.savefig('grafico.png')
+    return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
 
 
 def upload(request):
@@ -621,8 +546,6 @@ def medtronic(request, csv_file,usuario):
 
 def sleep_nap_resumen(request, csv_file,usuario,tipo_archivo):
     data_set = csv_file.read().decode('UTF-8')  # lee los datos
-    nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
-    tipo = nom[4]
     io_string = io.StringIO(data_set)
     next(io_string)
     if tipo_archivo == "FITBIT RESUMEN SUEÑO":
@@ -692,8 +615,6 @@ def sleep_nap_resumen(request, csv_file,usuario,tipo_archivo):
 
 def sleep_nap(request, csv_file,usuario,tipo_archivo):
 
-    nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
-    tipo = nom[4]
     # Data file name
     sl_data = pd.read_csv(csv_file, skiprows=1, sep=',', names=['Hora', 'Duracion (m)', 'Estado'])
 
@@ -927,6 +848,6 @@ def fitbit(request,csv_file,usuario):
         msg = "Error en el archivo"
 
     return msg, fecha_min, fecha_max
-#a
+
 
 

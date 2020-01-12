@@ -33,10 +33,17 @@
                         {% if request.user.id != request.user.paciente.user_ptr_id %}
                             <div class="form-group">
                                 <div class="rs-select2 js-select-simple select--no-search">
-                                    <select name="usuario" required>
-                                        <option value="">
-                                            SELECCIONAR PACIENTE
-                                        </option>
+                                    <select name="usuario"  onchange="this.form.submit()" required>
+                                        {% if usuario == None %}
+                                            <option value="">
+                                                SELECCIONAR PACIENTE
+                                            </option>
+                                        {% else %}
+                                            <option selected="true">
+                                                {{usuario}}
+                                            </option>
+                                        {% endif %}
+
                                         {% for objeto in pacientes %}
                                             <option>{{objeto.username}}</option>
                                         {% endfor %}
@@ -44,6 +51,10 @@
                                     <div class="select-dropdown"></div>
                                 </div>
                             </div>
+                        {% endif %}
+                        {% if fecha != None %}
+                            <div class="alert-info">{{fecha}}</div>
+                            <br>
                         {% endif %}
                         <div class="row">
                             <div class="col-md-5">
@@ -62,6 +73,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="col-md-5">
                                 <div class="custom-control custom-radio">
@@ -110,8 +122,8 @@
 
                             <div class="col-md-6 col-md-offset-4">
                                 <div class="custom-control custom-radio">
-                                    <input id="Bolus_volume" name="casillas[]" type="checkbox" class="custom-control-input" value="Bolus_volume">
-                                    <label class="custom-control-label" for="Bolus_volume">Volumen de bolus</label>
+                                    <input id="Bolus_volume_delivered" name="casillas[]" type="checkbox" class="custom-control-input" value="Bolus_volume_delivered">
+                                    <label class="custom-control-label" for="Bolus_volume_delivered">Volumen de bolus</label>
                                 </div>
                                 <div class="custom-control custom-radio">
                                     <input id="Bwz_carb_ratio" name="casillas[]" type="checkbox" class="custom-control-input" value="Bwz_carb_ratio" >
@@ -162,8 +174,14 @@
                                     <button name ="ver" class="btn btn--radius btn--green" type="submit">Ver Datos</button>
                                 </div>
                             </div>
+                            <div class="col-md-6 col-md-offset-4">
+                                <div class="p-t-20">
+                                    <button name ="grafico" class="btn btn--radius btn--green" type="submit">Ver Grafico</button>
+                                </div>
+                            </div>
                         </div>
                         {% if msg != None %}
+                            <br>
                             <div class="alert alert-success"><font color="red">{{msg}}</font></div>
                         {% endif %}
 
@@ -186,6 +204,7 @@
 
     <!-- Main JS-->
     <script src="{% static 'js/global.js' %}"></script>
+
 {% endblock js %}
 
 <!--
