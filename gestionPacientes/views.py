@@ -212,6 +212,9 @@ def download(request):
     if 'ver' in request.POST:
         disenio = '{% extends "base.html" %}\n'
         disenio += "{% load staticfiles i18n %}\n"
+        disenio += '{% block css %}\n'
+        disenio += '<link href="{% static "gestionPacientes/static/css/freelancer.css" %}" rel="stylesheet" type="text/css">\n'
+        disenio += '{% endblock css %}\n'
         disenio += "{% block title %}Ver Datos{% endblock title %}\n"
         disenio += "{% block content %}\n"
         tabla = df.to_html(classes='table table-striped table-hover')

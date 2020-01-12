@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% load staticfiles i18n %}
+{% block css %}
+<link href="{% static "gestionPacientes/static/css/freelancer.css" %}" rel="stylesheet" type="text/css">
+{% endblock css %}
 {% block title %}Ver Datos{% endblock title %}
 {% block content %}
-<table border="1" class="dataframe">
+<table border="1" class="dataframe table table-striped table-hover">
   <thead>
     <tr style="text-align: right;">
       <th></th>
