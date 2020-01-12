@@ -940,6 +940,6 @@ def fitbit(request,csv_file,usuario):
         msg = "Error en el archivo"
 
     return msg
-
+#a
 
 
