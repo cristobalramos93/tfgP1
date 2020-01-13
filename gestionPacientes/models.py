@@ -487,16 +487,6 @@ class Suenio_resumen(models.Model):
 
 #MEDTRONIC
 
-class Bg_reading(models.Model):
-    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
-    time = models.DateTimeField(null=False, blank=False)
-    bg_reading_mg_dL = models.FloatField(max_length=250)
-
-    class Meta:
-        db_table = 'bg_reading'
-        unique_together = (('id_user', 'time'),)
-
-
 class Basal_rate(models.Model):
     id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
     time = models.DateTimeField(null=False, blank=False)
@@ -524,40 +514,41 @@ class Bolus_volume_delivered(models.Model):
         db_table = 'bolus_volume_delivered'
         unique_together = (('id_user', 'time'),)
 
-class Bwz_carb_ratio(models.Model):
+class Carb_ratio(models.Model):
     id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
     time = models.DateTimeField(null=False, blank=False)
-    bwz_carb_ratio_U_EX = models.FloatField(max_length=250)
+    carb_ratio_U_EX = models.FloatField(max_length=250)
 
     class Meta:
-        db_table = 'bwz_carb_ratio'
+        db_table = 'carb_ratio'
         unique_together = (('id_user', 'time'),)
 
-class Bwz_carb_input(models.Model):
+class Carb_input(models.Model):
     id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
     time = models.DateTimeField(null=False, blank=False)
-    bwz_carb_input_EX = models.FloatField(max_length=250)
+    carb_input_EX = models.FloatField(max_length=250)
 
     class Meta:
-        db_table = 'bwz_carb_input'
+        db_table = 'carb_input'
         unique_together = (('id_user', 'time'),)
 
-class Sensor_calibration(models.Model):
+
+class Glucosa_medtronic(models.Model):
     id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
     time = models.DateTimeField(null=False, blank=False)
-    sensor_calibration_mg_dL = models.FloatField(max_length=250)
+    glucosa_medtronic_mg_dL = models.FloatField(max_length=250)
 
     class Meta:
-        db_table = 'sensor_calibration'
+        db_table = 'glucosa_medtronic'
         unique_together = (('id_user', 'time'),)
 
-class Sensor_glucose(models.Model):
+class Glucosa_freestyle(models.Model):
     id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
     time = models.DateTimeField(null=False, blank=False)
-    sensor_glucose_mg_dL = models.FloatField(max_length=250)
+    glucosa_freestyle_mg_dL = models.FloatField(max_length=250)
 
     class Meta:
-        db_table = 'sensor_glucose'
+        db_table = 'glucosa_freestyle'
         unique_together = (('id_user', 'time'),)
 
 class Insulina_rapida(models.Model):
@@ -612,4 +603,31 @@ class Hito_roche(models.Model):
 
     class Meta:
         db_table = 'hito_roche'
+        unique_together = (('id_user', 'time'),)
+
+class Evento_insulina_rapida(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    evento_insulina_rapida = models.CharField(max_length=250)
+
+    class Meta:
+        db_table = 'evento_insulina_rapida'
+        unique_together = (('id_user', 'time'),)
+
+class Evento_insulina_lenta(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    evento_insulina_lenta = models.CharField(max_length=250)
+
+    class Meta:
+        db_table = 'evento_insulina_lenta'
+        unique_together = (('id_user', 'time'),)
+
+class Evento_carbohidratos(models.Model):
+    id_user = models.ForeignKey(Paciente, on_delete=models.PROTECT)
+    time = models.DateTimeField(null=False, blank=False)
+    evento_carbohidratos = models.CharField(max_length=250)
+
+    class Meta:
+        db_table = 'evento_carbohidratos'
         unique_together = (('id_user', 'time'),)

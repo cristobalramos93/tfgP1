@@ -8,8 +8,9 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
-from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
-from gestionPacientes.models import  Bg_reading, Basal_rate, Bolus_type, Bolus_volume_delivered, Bwz_carb_input, Bwz_carb_ratio, Sensor_calibration, Sensor_glucose
+from gestionPacientes.models import Paciente, Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, \
+    Siesta_resumen, Suenio_resumen, Glucosa_freestyle, Evento_carbohidratos, Evento_insulina_lenta, Evento_insulina_rapida
+from gestionPacientes.models import Basal_rate, Bolus_type, Bolus_volume_delivered, Carb_input, Carb_ratio, Glucosa_medtronic
 from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre, Peso, Hito_roche
 from datetime import datetime
 from django.shortcuts import render
@@ -355,10 +356,10 @@ def roche(request, csv_file,usuario):
                         defaults={"glucosa_sangre_mg_dL": column[1], }
                     )
                 if column[2] != "":
-                    _, created = Bwz_carb_input.objects.update_or_create(
+                    _, created = Carb_input.objects.update_or_create(
                         time=column[0],
                         id_user_id=usuario,
-                        defaults={"bwz_carb_input_EX": column[2], }
+                        defaults={"carb_input_EX": column[2], }
                     )
                 if column[3] != "":
                     _, created = Basal_rate.objects.update_or_create(
@@ -490,10 +491,10 @@ def medtronic(request, csv_file,usuario):
         next(io_string)
         if col == "BG Reading (mg/dL)":
             for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-                _, created = Bg_reading.objects.update_or_create(
+                _, created = Glucosa_sangre.objects.update_or_create(
                     time=column[0],
                     id_user_id=usuario,
-                    defaults={"bg_reading_mg_dL": column[1], }
+                    defaults={"glucosa_sangre_mg_dL": column[1], }
                 )
         elif col == "Basal Rate (U/h)":
             for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
@@ -518,24 +519,24 @@ def medtronic(request, csv_file,usuario):
                 )
         elif col == "BWZ Carb Ratio (U/Ex)":
             for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-                _, created = Bwz_carb_ratio.objects.update_or_create(
+                _, created = Carb_ratio.objects.update_or_create(
                     time=column[0],
                     id_user_id=usuario,
-                    defaults={"bwz_carb_ratio_U_EX": column[1], }
+                    defaults={"carb_ratio_U_EX": column[1], }
                 )
         elif col == "BWZ Carb Input (exchanges)":
             for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-                _, created = Bwz_carb_input.objects.update_or_create(
+                _, created = Carb_input.objects.update_or_create(
                     time=column[0],
                     id_user_id=usuario,
-                    defaults={"bwz_carb_input_EX": column[1], }
+                    defaults={"carb_input_EX": column[1], }
                 )
         elif col == "Sensor Calibration BG (mg/dL)":
             for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-                _, created = Sensor_calibration.objects.update_or_create(
+                _, created = Glucosa_sangre.objects.update_or_create(
                     time=column[0],
                     id_user_id=usuario,
-                    defaults={"sensor_calibration_mg_dL": column[1], }
+                    defaults={"glucosa_sangre_mg_dL": column[1], }
                 )
     if medtron_data_2 is not None:
         medtron_data_2 = medtron_data_2.dropna()
@@ -547,10 +548,10 @@ def medtronic(request, csv_file,usuario):
         io_string = io.StringIO(data_set)
         next(io_string)
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-            _, created = Sensor_glucose.objects.update_or_create(
+            _, created = Glucosa_medtronic.objects.update_or_create(
                 time=column[0],
                 id_user_id=usuario,
-                defaults={"sensor_glucose_mg_dL": column[1], }
+                defaults={"glucosa_medtronic_mg_dL": column[1], }
             )
         msg = "Datos del sensor y la bomba de medtronic subidos con exito"
     else:
@@ -708,9 +709,10 @@ def sleep_nap(request, csv_file,usuario,tipo_archivo):
     return msg, fecha_min, fecha_max
 def free_style_sensor(request,csv_file,usuario):
     try:
-        gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=['Hora', 'Glucosa leída (mg/dL)', 'Histórico glucosa (mg/dL)', 'Insulina de acción rápida (unidades)',
-                                                                        'Carbohidratos (raciones)','Insulina de acción lenta (unidades)',
-                                                                        'Glucosa de la tira (mg/dL)', 'Cetonas (mmol/L)'])
+        gluc_data = pd.read_csv(csv_file, skiprows=1, sep=';', usecols=['Hora', 'Glucosa leída (mg/dL)', 'Histórico glucosa (mg/dL)', 'Insulina de acción rápida sin valor numérico',
+                                                                        'Insulina de acción rápida (unidades)', 'Alimentos sin valor numérico', 'Carbohidratos (raciones)',
+                                                                        'Insulina de acción lenta sin valor numérico',
+                                                                        'Insulina de acción lenta (unidades)', 'Glucosa de la tira (mg/dL)', 'Cetonas (mmol/L)'])
 
         # Convert time to time series
         gluc_data['Hora'] = pd.to_datetime(gluc_data['Hora'])
@@ -753,10 +755,10 @@ def free_style_sensor(request,csv_file,usuario):
                         )
                 elif col == "Carbohidratos (raciones)":
                     for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-                        _, created = Bwz_carb_input.objects.update_or_create(
+                        _, created = Carb_input.objects.update_or_create(
                             time=column[0],
                             id_user_id=usuario,
-                            defaults={"bwz_carb_input_EX": column[1], }
+                            defaults={"Carb_input_EX": column[1], }
                         )
                 elif col == "Insulina de acción lenta (unidades)":
                     for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
@@ -781,10 +783,31 @@ def free_style_sensor(request,csv_file,usuario):
                         )
                 elif col == "Glucosa_total":
                     for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
-                        _, created = Sensor_glucose.objects.update_or_create(
+                        _, created = Glucosa_freestyle.objects.update_or_create(
                             time=column[0],
                             id_user_id=usuario,
-                            defaults={"sensor_glucose_mg_dL": column[1], }
+                            defaults={"glucosa_freestyle_mg_dL": column[1], }
+                        )
+                elif col == "Insulina de acción rápida sin valor numérico":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Evento_insulina_rapida.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"evento_insulina_rapida": column[1], }
+                        )
+                elif col == "Insulina de acción lenta sin valor numérico":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Evento_insulina_lenta.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"evento_insulina_lenta": column[1], }
+                        )
+                elif col == "Alimentos sin valor numérico":
+                    for column in csv.reader(io_string, delimiter=',', quotechar="|"):  # inserta datos en la bd
+                        _, created = Evento_carbohidratos.objects.update_or_create(
+                            time=column[0],
+                            id_user_id=usuario,
+                            defaults={"evento_carbohidratos": column[1], }
                         )
                 msg = "Datos de freestyle subidos con éxito"
             except:

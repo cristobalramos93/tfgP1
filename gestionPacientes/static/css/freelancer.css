@@ -1368,6 +1368,12 @@ pre code {
   }
 }
 
+.plot{
+  width: 80%;
+  height: 60%;
+  margin: 6em;
+}
+
 .table {
   width: 100%;
   margin: 6em;
