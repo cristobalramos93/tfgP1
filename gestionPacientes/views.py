@@ -110,7 +110,7 @@ def register(request):
             print("no peso")
         enviar_correo(email,password1)
         return render(request, 'register.html',
-                      {'obj': obj, 'tipo_diabetes': tipo_diabetes, 'msg': "Usuario subido con éxito"})
+                      {'obj': obj, 'tipo_diabetes': tipo_diabetes, 'msg': "Usuario registrado con éxito"})
 
     else:
         return render(request,'register.html',{'obj': obj, 'tipo_diabetes' : tipo_diabetes})
