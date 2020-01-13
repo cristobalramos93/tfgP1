@@ -1,6 +1,5 @@
 import csv
 import io
-import os
 import numpy as np
 import pandas as pd
 from djqscsv import write_csv
@@ -9,11 +8,6 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as do_login
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.backends.backend_template import FigureCanvas
-from matplotlib.figure import Figure
-from mpld3 import fig_to_html
-
 from gestionPacientes.models import Paciente,Tratamiento, Pesos, Calorias, Ritmo_cardiaco, Pasos, Suenio, Siesta, Siesta_resumen, Suenio_resumen
 from gestionPacientes.models import  Bg_reading, Basal_rate, Bolus_type, Bolus_volume_delivered, Bwz_carb_input, Bwz_carb_ratio, Sensor_calibration, Sensor_glucose
 from gestionPacientes.models import Cetonas, Insulina_lenta, Insulina_rapida, Glucosa_sangre, Peso, Hito_roche
@@ -22,7 +16,8 @@ from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
 from django.core.mail import EmailMessage
 import matplotlib.pyplot as plt
-
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def enviar_correo(usuario, contrasenia):
     body = "Has sido registrado en Glucmodel\n USUARIO: " + usuario + "\n CONTRASEÑA: " + contrasenia
@@ -237,13 +232,21 @@ def download(request):
             os.remove("final.csv")
             return response
     elif 'grafico' in request.POST:
-        df.pop('id_user_id')#no quiero mostrar el id en el grafico
-        df.plot()
+        try:
+            df.pop('id_user_id')#no quiero mostrar el id en el grafico
+            df.plot()
+            plt.savefig(BASE_DIR + "/gestionPacientes/static/img/grafico.png")
+            html = '{% extends "base.html" %}\n'
+            html += "{% load staticfiles i18n %}\n"
+            html += "{% block content %}\n"
+            html += '<img class="plot" src="{{ figure }}"/>\n'
+            html += "{% endblock content %}"
 
-        #plt.savefig('grafico.png')
-        return render(request, 'grafico.html',{'response': plt} )
-
-
+            with open('gestionPacientes/plantillas/grafico.html', 'w') as f:
+                f.write(html)
+            return render(request, 'grafico.html',{'figure': "../static/img/grafico.png"})
+        except:
+            return render(request,'download.html',{'pacientes':pacientes,'fecha':fecha,'msg': "La tabla está vacía"})
     return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
 
 
@@ -273,7 +276,7 @@ def upload(request):
         usuario = Paciente.objects.get(username=usuario).id
     try:
         if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
-            msg, fecha_min, fecha_max = fitbit(request,csv_file,usuario)
+            msg, fecha_min, fecha_max = fitbit(request,csv_file,usuario,tipo_archivo)
         elif tipo_archivo == "FITBIT RESUMEN SUEÑO" or tipo_archivo == "FITBIT RESUMEN SIESTA":
             msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
         elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
@@ -801,18 +804,20 @@ def juntar_glu(r):
         r.Glucosa_total = np.nan
     return r
 
-def fitbit(request,csv_file,usuario):
-
-    nom = csv_file.name.split('_') #sacamos la fecha del nombre del archivo
-    tipo = nom[2]
+def fitbit(request,csv_file,usuario,tipo_archivo):
+    nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
     nom = nom[3].split('.')
     nom = nom[0]
     cal_data = pd.read_csv(csv_file, skiprows=1, sep=',', names=['time', 'calories'])
-    # Convert time to time series
     cal_data['time'] = pd.to_datetime(nom + ' ' + cal_data['time'])
+    # Convert time to time series
     cal_data.set_index('time', inplace=True)
     # 5 minutes resampling
-    cal_data = cal_data.resample('5T').sum()
+    if(tipo_archivo == "FITBIT RITMO CARDÍACO"):
+        cal_data = cal_data.resample('5T').mean()
+    else:
+        cal_data = cal_data.resample('5T').sum()
+
     #cal_data = cal_data.assign(id_user_id = request.user.paciente.user_ptr_id)
 
     fecha_min = cal_data.index.min()
@@ -825,7 +830,7 @@ def fitbit(request,csv_file,usuario):
     os.remove('calorias.csv')#elimina el archivo
     io_string = io.StringIO(data_set)
     next(io_string)
-    if(tipo == "cals"):
+    if(tipo_archivo == "FITBIT CALORÍAS"):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Calorias.objects.update_or_create(
                 time=column[0],
@@ -836,16 +841,18 @@ def fitbit(request,csv_file,usuario):
             )
         msg = "Calorías subidas con éxito"
 
-    elif(tipo == "heart"):
+    elif(tipo_archivo == "FITBIT RITMO CARDÍACO"):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Ritmo_cardiaco.objects.update_or_create(
                 time=column[0],
                 id_user_id=usuario,
-                defaults={"heart_rate": column[1],}
+                defaults={
+                    "heart_rate": column[1],
+                }
             )
         msg = "Ritmo cardiaco subido con éxito"
 
-    elif(tipo == "steps"):
+    elif(tipo_archivo == "FITBIT PASOS"):
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):#inserta datos en la bd
             _, created = Pasos.objects.update_or_create(
                 time=column[0],

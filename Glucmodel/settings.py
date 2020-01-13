@@ -128,6 +128,6 @@ STATIC_URL = '/static/'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'glucmodel@ucm.es'
-EMAIL_HOST_PASSWORD = 'maqueda9'
+EMAIL_HOST_PASSWORD = 'maqviles77'
 EMAIL_PORT = 587
 #https://myaccount.google.com/security activar acceso a aplicaciones poco seguras

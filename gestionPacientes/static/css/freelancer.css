@@ -1427,7 +1427,14 @@ pre code {
   color: #212529;
   background-color: rgba(0, 0, 0, 0.075);
 }
-
+.plot{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5%;
+  margin-bottom: 2%;
+  width: 50%
+}
 .table-primary,
 .table-primary > th,
 .table-primary > td {
