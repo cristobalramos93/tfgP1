@@ -289,16 +289,20 @@ def upload(request):
         elif (tipo_archivo == "ROCHE"):
             msg, fecha_min, fecha_max = roche(request, csv_file, usuario)
 
-        #Guarda las fechas maximas y minimas de cada paciente al insertas datos en la BD
-        paciente = Paciente.objects.get(user_ptr_id=usuario)
-        paciente_fecha_min = paciente.first_date
-        paciente_fecha_max = paciente.last_date
-        if (paciente_fecha_min is None) or (fecha_min < paciente_fecha_min):
-            paciente.first_date = fecha_min
-            paciente.save()
-        if (paciente_fecha_max is None) or (fecha_max > paciente_fecha_max):
-            paciente.last_date = fecha_max
-            paciente.save()
+        try:
+            #Guarda las fechas maximas y minimas de cada paciente al insertas datos en la BD
+            paciente = Paciente.objects.get(user_ptr_id=usuario)
+            paciente_fecha_min = paciente.first_date
+            paciente_fecha_max = paciente.last_date
+
+            if (paciente_fecha_min is None) or (fecha_min < paciente_fecha_min):
+                paciente.first_date = fecha_min
+                paciente.save()
+            if (paciente_fecha_max is None) or (fecha_max > paciente_fecha_max):
+                paciente.last_date = fecha_max
+                paciente.save()
+        except:
+            msg = "Datos subidos con éxito (sin fecha)"
 
     except:
         msg = "Los datos no corresponden con el nombre seleccionado"
@@ -560,6 +564,7 @@ def medtronic(request, csv_file,usuario):
     return msg, fecha_min, fecha_max
 
 def sleep_nap_resumen(request, csv_file,usuario,tipo_archivo):
+
     data_set = csv_file.read().decode('UTF-8')  # lee los datos
     io_string = io.StringIO(data_set)
     next(io_string)
