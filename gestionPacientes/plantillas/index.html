@@ -7,22 +7,21 @@
         <div class="container d-flex align-items-center flex-column">
 
             <!-- Masthead Avatar Image -->
-            <img class="masthead-avatar mb-5" src="{% static 'img/avataaars.svg' %}" alt="">
+            {% if request.user.id == request.user.investigador.user_ptr_id %}
+                <img class="masthead-avatar mb-5" src="{% static 'img/einstein.png' %}" alt="">
+            {% endif %}
+            {% if request.user.id == request.user.paciente.user_ptr_id %}
+                <img class="masthead-avatar mb-5" src="{% static 'img/avataaars.svg' %}" alt="">
+            {% endif %}
+            {% if request.user.id == request.user.medico.user_ptr_id %}
+                <img class="masthead-avatar mb-5" src="{% static 'img/medicheck.png' %}" alt="">
+            {% endif %}
 
             <!-- Masthead Heading -->
             <h1 class="masthead-heading text-uppercase mb-0">Hola {{request.user.username}}</h1>
 
-
-            {% if request.user.id == request.user.medico.user_ptr_id %}
-                <form action='register' method='GET'>
-                    <button class="btn btn-xl btn-outline-light" type='submit'> Registrar un paciente</button>
-                </form>
-                <form action='download' method='GET'>
-                    <button class="btn btn-xl btn-outline-light" type='submit'> Descargar Pacientes</button>
-                </form>
-            {% endif %}
-
             {% if request.user.id == request.user.paciente.user_ptr_id %}
+                <br>
                 <form action='new_password' method='GET'>
                     <button class="btn btn-xl btn-outline-light" type='submit'> Cambiar Contraseña</button>
                 </form>

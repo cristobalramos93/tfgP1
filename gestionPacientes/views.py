@@ -21,293 +21,323 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def enviar_correo(usuario, contrasenia):
-    body = "Has sido registrado en Glucmodel\n USUARIO: " + usuario + "\n CONTRASEÑA: " + contrasenia
-    email = EmailMessage('Registro Glucmodel', body, to=[usuario])
-    email.send()
+    try:
+        body = "Has sido registrado en Glucmodel\n USUARIO: " + usuario + "\n CONTRASEÑA: " + contrasenia
+        email = EmailMessage('Registro Glucmodel', body, to=[usuario])
+        email.send()
+    except:
+        return redirect('/register')
 
 
 def welcome(request):
-    # Si estamos identificados devolvemos la portada
-    if request.user.is_authenticated:
-        return render(request, "index.html")
-    # En otro caso redireccionamos al login
-    return redirect('/login')
+    try:
+        # Si estamos identificados devolvemos la portada
+        if request.user.is_authenticated:
+            return render(request, "index.html")
+        # En otro caso redireccionamos al login
+        return redirect('/login')
+    except:
+        return redirect('/login')
 
 def new_password(request):
-    template = 'new_password.html'
-    if request.method == "POST":
-        # Recuperamos las credenciales validadas
-        old_pas = request.POST['old_pas']
-        new_pas = request.POST['new_pas']
-        new_pas2 = request.POST['new_pas2']
-        user = authenticate(username=request.user.username, password=old_pas)
-        if user is None: #si no existe este usuario
-            return render(request,template,{'msg': "La contraseña es erronea"})
-        elif new_pas != new_pas2:
-            return render(request, template,{'msg': "La nueva contraseña debe coincidir"})
-        elif new_pas == old_pas:
-            return render(request, template,{'msg': "La contraseña nueva no puede ser la misma que la anterior"})
+    try:
+        template = 'new_password.html'
+        if request.method == "POST":
+            # Recuperamos las credenciales validadas
+            old_pas = request.POST['old_pas']
+            new_pas = request.POST['new_pas']
+            new_pas2 = request.POST['new_pas2']
+            user = authenticate(username=request.user.username, password=old_pas)
+            if user is None: #si no existe este usuario
+                return render(request,template,{'msg': "La contraseña es erronea"})
+            elif new_pas != new_pas2:
+                return render(request, template,{'msg': "La nueva contraseña debe coincidir"})
+            elif new_pas == old_pas:
+                return render(request, template,{'msg': "La contraseña nueva no puede ser la misma que la anterior"})
+
+            else:
+                p = Paciente.objects.get(id = request.user.id)
+                p.password = make_password(new_pas)
+                p.save()
+                do_logout(request)
+                return redirect('/login')
+
 
         else:
-            p = Paciente.objects.get(id = request.user.id)
-            p.password = make_password(new_pas)
-            p.save()
-            do_login(request, user)
-            return render(request,template,{'msg': "Contraseña cambiada con éxito"})
+            return render(request, template)
+    except:
+        return redirect('/login')
 
-    else:
-        return render(request, template)
 
 def register(request):
+    try:
+        obj = Tratamiento.objects.all()
+        tipo_diabetes = Paciente.TYPES
+        if request.method == 'POST':
 
-    obj = Tratamiento.objects.all()
-    tipo_diabetes = Paciente.TYPES
-    if request.method == 'POST':
+            password1 = request.POST['password1']
+            password2 = request.POST['password2']
+            email = request.POST['email']
+            birth_date = request.POST['birth_date']
+            start_date = request.POST['start_date']
 
-        password1 = request.POST['password1']
-        password2 = request.POST['password2']
-        email = request.POST['email']
-        birth_date = request.POST['birth_date']
-        start_date = request.POST['start_date']
+            format_str = '%d/%m/%Y'
+            birth_date = datetime.strptime(birth_date, format_str)
+            start_date = datetime.strptime(start_date, format_str)
+            diabetes_type = request.POST['diabetes_type']
+            treatment_id = request.POST['treatment_id']
+            treatment_id = Tratamiento.objects.get(code = treatment_id)
+            treatment_id = treatment_id.id
 
-        format_str = '%d/%m/%Y'
-        birth_date = datetime.strptime(birth_date, format_str)
-        start_date = datetime.strptime(start_date, format_str)
-        diabetes_type = request.POST['diabetes_type']
-        treatment_id = request.POST['treatment_id']
-        treatment_id = Tratamiento.objects.get(code = treatment_id)
-        treatment_id = treatment_id.id
+            if Paciente.objects.filter(username = email).count():
+                return render(request,"register.html",{'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "El paciente " + email + " ya existe"})
 
-        if Paciente.objects.filter(username = email).count():
-            return render(request,"register.html",{'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "El paciente " + email + " ya existe"})
+            if password1 and password2 and password1 != password2:
+                return render(request, 'register.html', {'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "Las contraseñas deben coincidir"})
 
-        if password1 and password2 and password1 != password2:
-            return render(request, 'register.html', {'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "Las contraseñas deben ser iguales"})
-
-        paciente = Paciente(
-            password = make_password(password1),
-            username = email,
-            birth_date = birth_date,
-            start_date = start_date,
-            diabetes_type = diabetes_type,
-            treatment_id = treatment_id,
-            doctor_id_id = request.user.medico.user_ptr_id
-        )
-        paciente.save()
-
-        try:
-            weight = request.POST['weight']
-            paciente_peso = Paciente.objects.get(username=email)
-            paciente_peso = paciente_peso.user_ptr_id
-
-            peso = Peso(
-                peso = weight,
-                id_user_id= paciente_peso,
-                time = datetime.now()
+            paciente = Paciente(
+                password = make_password(password1),
+                username = email,
+                birth_date = birth_date,
+                start_date = start_date,
+                diabetes_type = diabetes_type,
+                treatment_id = treatment_id,
+                doctor_id_id = request.user.medico.user_ptr_id
             )
-            peso.save()
-        except Exception as e:
-            print("no peso")
-        enviar_correo(email,password1)
-        return render(request, 'register.html',
-                      {'obj': obj, 'tipo_diabetes': tipo_diabetes, 'msg': "Usuario registrado con éxito"})
+            paciente.save()
 
-    else:
-        return render(request,'register.html',{'obj': obj, 'tipo_diabetes' : tipo_diabetes})
+            try:
+                weight = request.POST['weight']
+                paciente_peso = Paciente.objects.get(username=email)
+                paciente_peso = paciente_peso.user_ptr_id
+
+                peso = Peso(
+                    peso = weight,
+                    id_user_id= paciente_peso,
+                    time = datetime.now()
+                )
+                peso.save()
+            except Exception as e:
+                print("no peso")
+            enviar_correo(email,password1)
+            return render(request, 'register.html',
+                          {'obj': obj, 'tipo_diabetes': tipo_diabetes, 'msg': "Usuario registrado con éxito"})
+
+        else:
+            return render(request,'register.html',{'obj': obj, 'tipo_diabetes' : tipo_diabetes})
+    except:
+        return render(request, 'register.html', {'obj': obj, 'tipo_diabetes': tipo_diabetes,'msg': "Ha ocurrido un error"})
 
 
 def login(request):
-    # Creamos el formulario de autenticación vacío
-    if request.method == "POST":
+    try:
+        # Creamos el formulario de autenticación vacío
+        if request.method == "POST":
 
-            # Recuperamos las credenciales validadas
-            username = request.POST['username']
-            password = request.POST['password']
+                # Recuperamos las credenciales validadas
+                username = request.POST['username']
+                password = request.POST['password']
 
-            # Verificamos las credenciales del usuario
-            user = authenticate(username=username, password=password)
+                # Verificamos las credenciales del usuario
+                user = authenticate(username=username, password=password)
 
-            # Si existe un usuario con ese nombre y contraseña
-            if user is not None:
-                # Hacemos el login manualmente
-                do_login(request, user)
-                # Y le redireccionamos a la portada
-                return redirect('/')
-            else: #si el nom de usuario o contraseña es incorrecto
-                msg = "Error en el usuario o contraseña"
-                return render(request, "login.html",{'msg':msg})
+                # Si existe un usuario con ese nombre y contraseña
+                if user is not None:
+                    # Hacemos el login manualmente
+                    do_login(request, user)
+                    # Y le redireccionamos a la portada
+                    return redirect('/')
+                else: #si el nom de usuario o contraseña es incorrecto
+                    msg = "Error en el usuario o contraseña"
+                    return render(request, "login.html",{'msg':msg})
 
-    # Si llegamos al final renderizamos el formulario
+        # Si llegamos al final renderizamos el formulario
 
-    return render(request, "login.html")
+        return render(request, "login.html")
+    except:
+        msg = "Error en el usuario o contraseña"
+        return render(request, "login.html", {'msg': msg})
 
 def logout(request):
-    do_logout(request)
-    # Redireccionamos a la portada
-    return redirect('/')
+    try:
+        do_logout(request)
+        # Redireccionamos a la portada
+        return redirect('/')
+    except:
+        return redirect('/')
+
 
 
 def download(request):
     try:
-        if request.user.id == request.user.paciente.user_ptr_id:# si es un paciente solo se puede descargar a si mismo
-            pacientes = Paciente.objects.filter(id=request.user.id)
-            #aqui busco su fecha
-            menor = request.user.paciente.first_date
-            mayor = request.user.paciente.last_date
-            fecha = "Existen registros de la fecha " + str(menor) + " a la fecha " + str(mayor)
-
-
-    except:
-        pacientes = Paciente.objects.all()#puede descargar todos los pacientes
-        fecha = None
-    if request.method == 'POST':
-        first_date = request.POST['first_date'] #esto es solo para ver si se ha completado el formulario, si no se ha completado significa que solo has puesto el nombre de usuario, y va a calcular sus registros
-
-        if 'usuario' in request.POST and first_date == "": #si has seleccionado un usuario
-            msg = None
-            usuario = request.POST['usuario']
-            fecha_min = Paciente.objects.get(username=usuario).first_date
-            fecha_max = Paciente.objects.get(username=usuario).last_date
-
-            if(fecha_min == None):
-                fecha = None
-                msg = "No existen datos de este usuario"
-                return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha,'usuario':usuario})
-
-            else:
-                fecha_min = fecha_min.strftime("%d-%m-%Y") #lo paso a string con el formato que queremos
-                fecha_max = fecha_max.strftime("%d-%m-%Y")
-                fecha = "Existen registros de la fecha " + fecha_min + " a la fecha " + fecha_max
-                return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha,'usuario':usuario})
-
-        #first_date = request.POST['first_date']
-        final_date = request.POST['final_date']
-        campos = request.POST.getlist("casillas[]")
-        if(len(campos) == 0):
-            msg = "Selecciona algún dato"
-            return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha})
         try:
-            usuario = request.POST['usuario']
-        except:
-            usuario = Paciente.objects.get(id=request.user.id).username
+            if request.user.id == request.user.paciente.user_ptr_id:# si es un paciente solo se puede descargar a si mismo
+                pacientes = Paciente.objects.filter(id=request.user.id)
+                #aqui busco su fecha
+                menor = request.user.paciente.first_date
+                mayor = request.user.paciente.last_date
+                fecha = "Existen registros de la fecha " + str(menor) + " a la fecha " + str(mayor)
 
-        format_str = '%d/%m/%Y'
-        first_date = datetime.strptime(first_date, format_str)
-        final_date = datetime.strptime(final_date, format_str)
-    else:
+
+        except:
+            pacientes = Paciente.objects.all()#puede descargar todos los pacientes
+            fecha = None
+        if request.method == 'POST':
+            first_date = request.POST['first_date'] #esto es solo para ver si se ha completado el formulario, si no se ha completado significa que solo has puesto el nombre de usuario, y va a calcular sus registros
+
+            if 'usuario' in request.POST and first_date == "": #si has seleccionado un usuario
+                msg = None
+                usuario = request.POST['usuario']
+                fecha_min = Paciente.objects.get(username=usuario).first_date
+                fecha_max = Paciente.objects.get(username=usuario).last_date
+
+                if(fecha_min == None):
+                    fecha = None
+                    msg = "No existen datos de este usuario"
+                    return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha,'usuario':usuario})
+
+                else:
+                    fecha_min = fecha_min.strftime("%d-%m-%Y") #lo paso a string con el formato que queremos
+                    fecha_max = fecha_max.strftime("%d-%m-%Y")
+                    fecha = "Existen registros de la fecha " + fecha_min + " a la fecha " + fecha_max
+                    return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha,'usuario':usuario})
+
+            #first_date = request.POST['first_date']
+            final_date = request.POST['final_date']
+            campos = request.POST.getlist("casillas[]")
+            if(len(campos) == 0):
+                msg = "Selecciona algún dato"
+                return render(request, 'download.html', {'pacientes': pacientes, 'msg': msg, 'fecha':fecha})
+            try:
+                usuario = request.POST['usuario']
+            except:
+                usuario = Paciente.objects.get(id=request.user.id).username
+
+            format_str = '%d/%m/%Y'
+            first_date = datetime.strptime(first_date, format_str)
+            final_date = datetime.strptime(final_date, format_str)
+        else:
+            return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
+
+        id_usuario = Paciente.objects.get(username = usuario).id
+        df = pd.DataFrame(columns=['time', "id_user_id"])
+        for tabla in campos:
+            items = eval(tabla).objects.filter(id_user_id = id_usuario,time__gte=first_date, time__lte= final_date)
+            with open('items.csv', 'wb') as csv_file:
+                write_csv(items, csv_file)
+            df_aux = pd.read_csv("items.csv")
+            df_aux = df_aux.drop(columns = ["ID"])
+            df = df.merge(df_aux, on = ['time','id_user_id'], how = 'outer')
+            csv_file.close()  # cierra el archivo calorias para poder eliminarlo
+            os.remove('items.csv')
+        df = df.set_index("time", drop=True)
+        df = df.sort_index()
+        if 'ver' in request.POST:
+            disenio = '{% extends "base.html" %}\n'
+            disenio += "{% load staticfiles i18n %}\n"
+            disenio += '{% block css %}\n'
+            disenio += '<link href="{% static "gestionPacientes/static/css/freelancer.css" %}" rel="stylesheet" type="text/css">\n'
+            disenio += '{% endblock css %}\n'
+            disenio += "{% block title %}Ver Datos{% endblock title %}\n"
+            disenio += "{% block content %}\n"
+            tabla = df.to_html(classes='table table-striped table-hover')
+            disenio += tabla
+            disenio += "\n"
+            disenio += "{% endblock content %}"
+            with open("gestionPacientes/plantillas/table.html", "w") as file:
+                file.write(disenio)
+            return render(request,"table.html")
+        elif 'descarga' in request.POST: #si es descargar
+            df.to_csv("final.csv")
+            with open('final.csv') as myfile:
+                response = HttpResponse(myfile, content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename ='+ str(id_usuario) +'_'+ usuario + '.csv'
+                os.remove("final.csv")
+                return response
+        elif 'grafico' in request.POST:
+            try:
+                df.pop('id_user_id')#no quiero mostrar el id en el grafico
+                df.plot()
+                plt.xticks(fontsize=7, rotation=20)
+                plt.savefig(BASE_DIR + "/gestionPacientes/static/img/grafico.png")
+                html = '{% extends "base.html" %}\n'
+                html += "{% load staticfiles i18n %}\n"
+                html += "{% block title %}Ver Grafico{% endblock title %}\n"
+                html += "{% block content %}\n"
+                html += '<img class="plot" src="{{ figure }}"/>\n'
+                html += "{% endblock content %}"
+
+                with open('gestionPacientes/plantillas/grafico.html', 'w') as f:
+                    f.write(html)
+                return render(request, 'grafico.html',{'figure': "../static/img/grafico.png"})
+            except:
+                return render(request,'download.html',{'pacientes':pacientes,'fecha':fecha,'msg': "La tabla está vacía"})
         return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
+    except:
+        return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha,'msg': "Ha ocurrido un error"})
 
-    id_usuario = Paciente.objects.get(username = usuario).id
-    df = pd.DataFrame(columns=['time', "id_user_id"])
-    for tabla in campos:
-        items = eval(tabla).objects.filter(id_user_id = id_usuario,time__gte=first_date, time__lte= final_date)
-        with open('items.csv', 'wb') as csv_file:
-            write_csv(items, csv_file)
-        df_aux = pd.read_csv("items.csv")
-        df_aux = df_aux.drop(columns = ["ID"])
-        df = df.merge(df_aux, on = ['time','id_user_id'], how = 'outer')
-        csv_file.close()  # cierra el archivo calorias para poder eliminarlo
-        os.remove('items.csv')
-    df = df.set_index("time", drop=True)
-    df = df.sort_index()
-    if 'ver' in request.POST:
-        disenio = '{% extends "base.html" %}\n'
-        disenio += "{% load staticfiles i18n %}\n"
-        disenio += '{% block css %}\n'
-        disenio += '<link href="{% static "gestionPacientes/static/css/freelancer.css" %}" rel="stylesheet" type="text/css">\n'
-        disenio += '{% endblock css %}\n'
-        disenio += "{% block title %}Ver Datos{% endblock title %}\n"
-        disenio += "{% block content %}\n"
-        tabla = df.to_html(classes='table table-striped table-hover')
-        disenio += tabla
-        disenio += "\n"
-        disenio += "{% endblock content %}"
-        with open("gestionPacientes/plantillas/table.html", "w") as file:
-            file.write(disenio)
-        return render(request,"table.html")
-    elif 'descarga' in request.POST: #si es descargar
-        df.to_csv("final.csv")
-        with open('final.csv') as myfile:
-            response = HttpResponse(myfile, content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename ='+ str(id_usuario) +'_'+ usuario + '.csv'
-            os.remove("final.csv")
-            return response
-    elif 'grafico' in request.POST:
-        try:
-            df.pop('id_user_id')#no quiero mostrar el id en el grafico
-            df.plot()
-            plt.xticks(rotation=45)
-            plt.savefig(BASE_DIR + "/gestionPacientes/static/img/grafico.png")
-            html = '{% extends "base.html" %}\n'
-            html += "{% load staticfiles i18n %}\n"
-            html += "{% block content %}\n"
-            html += '<img class="plot" src="{{ figure }}"/>\n'
-            html += "{% endblock content %}"
-
-            with open('gestionPacientes/plantillas/grafico.html', 'w') as f:
-                f.write(html)
-            return render(request, 'grafico.html',{'figure': "../static/img/grafico.png"})
-        except:
-            return render(request,'download.html',{'pacientes':pacientes,'fecha':fecha,'msg': "La tabla está vacía"})
-    return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
 
 
 def upload(request):
-    template = "upload.html"
-    try: #si es paceinte
-        if request.user.id == request.user.paciente.user_ptr_id:
-            pacientes = "nada"
-
-    except: # si es un medicco o investigador o admin
-        pacientes = Paciente.objects.all()
-
-    if request.method == 'GET':
-        return render(request, template,{'pacientes' : pacientes})
-
-    csv_file = request.FILES['file']
-    tipo_archivo = request.POST['tipo_archivo'] #nombre del usuario
-    nom = csv_file.name.split('_')
-    extension = csv_file.name.split('.')
-    if extension[1] != 'csv':
-        return render(request, template, {'pacientes': pacientes, 'msg': "El archivo debe tener la extensión .csv"})
-
     try:
-        usuario = request.user.paciente.user_ptr_id # si es u paciente, saco su id
-    except:# si es un  medico, el id lo saco del usuario seleccionado
-        usuario = request.POST['usuario'] #nombre del usuario
-        usuario = Paciente.objects.get(username=usuario).id
-    try:
-        if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
-            msg, fecha_min, fecha_max = fitbit(request,csv_file,usuario,tipo_archivo)
-        elif tipo_archivo == "FITBIT RESUMEN SUEÑO" or tipo_archivo == "FITBIT RESUMEN SIESTA":
-            msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
-        elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
-            msg, fecha_min, fecha_max = sleep_nap(request,csv_file,usuario,tipo_archivo)
-        elif(tipo_archivo == "MEDTRONIC"):
-            msg, fecha_min, fecha_max = medtronic(request,csv_file,usuario)
-        elif (tipo_archivo == "FREE STYLE SENSOR"):
-            msg, fecha_min, fecha_max = free_style_sensor(request, csv_file, usuario)
-        elif (tipo_archivo == "ROCHE"):
-            msg, fecha_min, fecha_max = roche(request, csv_file, usuario)
+        template = "upload.html"
+        try: #si es paceinte
+            if request.user.id == request.user.paciente.user_ptr_id:
+                pacientes = "nada"
+
+        except: # si es un medicco o investigador o admin
+            pacientes = Paciente.objects.all()
+
+        if request.method == 'GET':
+            return render(request, template,{'pacientes' : pacientes})
+
+        csv_file = request.FILES['file']
+        tipo_archivo = request.POST['tipo_archivo'] #nombre del usuario
+        nom = csv_file.name.split('_')
+        extension = csv_file.name.split('.')
+        if extension[1] != 'csv':
+            return render(request, template, {'pacientes': pacientes, 'msg': "El archivo debe tener la extensión .csv"})
 
         try:
-            #Guarda las fechas maximas y minimas de cada paciente al insertas datos en la BD
-            paciente = Paciente.objects.get(user_ptr_id=usuario)
-            paciente_fecha_min = paciente.first_date
-            paciente_fecha_max = paciente.last_date
+            usuario = request.user.paciente.user_ptr_id # si es u paciente, saco su id
+        except:# si es un  medico, el id lo saco del usuario seleccionado
+            usuario = request.POST['usuario'] #nombre del usuario
+            usuario = Paciente.objects.get(username=usuario).id
+        try:
+            if tipo_archivo == "FITBIT CALORÍAS" or tipo_archivo == "FITBIT RITMO CARDÍACO" or tipo_archivo == "FITBIT PASOS" :
+                msg, fecha_min, fecha_max = fitbit(request,csv_file,usuario,tipo_archivo)
+            elif tipo_archivo == "FITBIT RESUMEN SUEÑO" or tipo_archivo == "FITBIT RESUMEN SIESTA":
+                msg = sleep_nap_resumen(request,csv_file,usuario,tipo_archivo)
+            elif tipo_archivo == "FITBIT SIESTA" or tipo_archivo == "FITBIT SUEÑO":
+                msg, fecha_min, fecha_max = sleep_nap(request,csv_file,usuario,tipo_archivo)
+            elif(tipo_archivo == "MEDTRONIC"):
+                msg, fecha_min, fecha_max = medtronic(request,csv_file,usuario)
+            elif (tipo_archivo == "FREE STYLE SENSOR"):
+                msg, fecha_min, fecha_max = free_style_sensor(request, csv_file, usuario)
+            elif (tipo_archivo == "ROCHE"):
+                msg, fecha_min, fecha_max = roche(request, csv_file, usuario)
 
-            if (paciente_fecha_min is None) or (fecha_min < paciente_fecha_min):
-                paciente.first_date = fecha_min
-                paciente.save()
-            if (paciente_fecha_max is None) or (fecha_max > paciente_fecha_max):
-                paciente.last_date = fecha_max
-                paciente.save()
+            try:
+                #Guarda las fechas maximas y minimas de cada paciente al insertas datos en la BD
+                paciente = Paciente.objects.get(user_ptr_id=usuario)
+                paciente_fecha_min = paciente.first_date
+                paciente_fecha_max = paciente.last_date
+
+                if (paciente_fecha_min is None) or (fecha_min < paciente_fecha_min):
+                    paciente.first_date = fecha_min
+                    paciente.save()
+                if (paciente_fecha_max is None) or (fecha_max > paciente_fecha_max):
+                    paciente.last_date = fecha_max
+                    paciente.save()
+            except:
+                msg = "Datos subidos con éxito (sin fecha)"
+
         except:
-            msg = "Datos subidos con éxito (sin fecha)"
-
+            msg = "Los datos no corresponden con el nombre seleccionado"
+        return render(request, template,{'msg': msg,'pacientes': pacientes})
     except:
-        msg = "Los datos no corresponden con el nombre seleccionado"
-    return render(request, template,{'msg': msg,'pacientes': pacientes})
+        msg = "Ha ocurrido un error"
+        return render(request, template,{'msg': msg,'pacientes': pacientes})
 
 def roche(request, csv_file,usuario):
     try:
