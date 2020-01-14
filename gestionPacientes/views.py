@@ -236,6 +236,7 @@ def download(request):
         try:
             df.pop('id_user_id')#no quiero mostrar el id en el grafico
             df.plot()
+            plt.xticks(rotation=45)
             plt.savefig(BASE_DIR + "/gestionPacientes/static/img/grafico.png")
             html = '{% extends "base.html" %}\n'
             html += "{% load staticfiles i18n %}\n"
