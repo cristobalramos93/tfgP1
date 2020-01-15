@@ -853,6 +853,11 @@ def free_style_sensor(request,csv_file,usuario):
     return msg, fecha_min, fecha_max
 
 def juntar_glu(r):
+    #En esta funcion cogemos los datos de las columnas glucosa leida e historico de glucosa
+    #En el caso en el que coincidan ambas en la misma fehca/hora (ej: 2017/02/02 10:05) se hace la media de ambas y se guarda
+    #Si solo hay una de las dos nos quedamos con aquella que este informada
+    #y si no hay ninguna devolvemos un np.nan
+    #Este proceso se hace usando un apply que recorre todas las filas del DF, es decir que a la funcion le llegan filas (rows --> r)
     if (r["Glucosa leída (mg/dL)"] > 0) & (r["Histórico glucosa (mg/dL)"] > 0):
         r.Glucosa_total = (r["Glucosa leída (mg/dL)"] + r["Histórico glucosa (mg/dL)"])/2
     elif r["Glucosa leída (mg/dL)"] > 0:
@@ -864,20 +869,45 @@ def juntar_glu(r):
     return r
 
 def fitbit(request,csv_file,usuario,tipo_archivo):
-    nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
-    nom = nom[3].split('.')
-    nom = nom[0]
-    cal_data = pd.read_csv(csv_file, skiprows=1, sep=',', names=['time', 'calories'])
-    cal_data['time'] = pd.to_datetime(nom + ' ' + cal_data['time'])
-    # Convert time to time series
-    cal_data.set_index('time', inplace=True)
-    # 5 minutes resampling
-    if(tipo_archivo == "FITBIT RITMO CARDÍACO"):
-        cal_data = cal_data.resample('5T').mean()
-    else:
-        cal_data = cal_data.resample('5T').sum()
+    #Esto lo tenemos que hacer ya que si intentamos leer varias veces el .csv se pierde la informacion por lo
+    # que cuardamos una copia en local, al final del script se borra
+    data = pd.read_csv(csv_file)
+    data.to_csv("calorias.csv")
+    try:
+        if (tipo_archivo == "FITBIT CALORÍAS"):
+            cal_data = pd.read_csv("calorias.csv", usecols=['dateTime', 'calories', 'multi_day'])
+            cal_data.set_index('dateTime', inplace=True)
+            # 5 minutes resampling
+            cal_data = cal_data.resample('5T').sum()
+            cal_data.pop('multi_day')
 
-    #cal_data = cal_data.assign(id_user_id = request.user.paciente.user_ptr_id)
+        if (tipo_archivo == "FITBIT RITMO CARDÍACO"):
+            cal_data = pd.read_csv("calorias.csv", usecols=['dateTime', 'heart_rate', 'multi_day'])
+            cal_data.set_index('dateTime', inplace=True)
+            # 5 minutes resampling
+            cal_data = cal_data.resample('5T').mean()
+            cal_data.pop('multi_day')
+
+        if (tipo_archivo == "FITBIT PASOS"):
+            cal_data = pd.read_csv("calorias.csv", usecols=['dateTime', 'steps', 'multi_day'])
+            cal_data.set_index('dateTime', inplace=True)
+            # 5 minutes resampling
+            cal_data = cal_data.resample('5T').sum()
+            cal_data.pop('multi_day')
+
+    except:
+        nom = csv_file.name.split('_')  # sacamos la fecha del nombre del archivo
+        nom = nom[3].split('.')
+        nom = nom[0]
+        cal_data = pd.read_csv("calorias.csv", skiprows=1, sep=',', names=['time', 'calories'])
+        cal_data['time'] = pd.to_datetime(nom + ' ' + cal_data['time'])
+        # Convert time to time series
+        cal_data.set_index('time', inplace=True)
+        # 5 minutes resampling
+        if(tipo_archivo == "FITBIT RITMO CARDÍACO"):
+            cal_data = cal_data.resample('5T').mean()
+        else:
+            cal_data = cal_data.resample('5T').sum()
 
     fecha_min = cal_data.index.min()
     fecha_max = cal_data.index.max()
