@@ -238,7 +238,7 @@ def download(request):
             disenio += '{% block css %}\n'
             disenio += '<link href="{% static "gestionPacientes/static/css/freelancer.css" %}" rel="stylesheet" type="text/css">\n'
             disenio += '{% endblock css %}\n'
-            disenio += "{% block title %}Ver Datos{% endblock title %}\n"
+            disenio += "{% block title %}Tabla{% endblock title %}\n"
             disenio += "{% block content %}\n"
             tabla = df.to_html(classes='table table-striped table-hover')
             disenio += tabla
@@ -263,6 +263,7 @@ def download(request):
                 html = '{% extends "base.html" %}\n'
                 html += "{% load staticfiles i18n %}\n"
                 html += "{% block title %}Ver Grafico{% endblock title %}\n"
+                disenio += "{% block title %}Grafico{% endblock title %}\n"
                 html += "{% block content %}\n"
                 html += '<img class="plot" src="{{ figure }}"/>\n'
                 html += "{% endblock content %}"
