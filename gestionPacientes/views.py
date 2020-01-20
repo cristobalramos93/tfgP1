@@ -256,26 +256,25 @@ def download(request):
                 return response
         elif 'grafico' in request.POST:
             try:
-                df.pop('id_user_id')#no quiero mostrar el id en el grafico
+                df.pop('id_user_id')  # no quiero mostrar el id en el grafico
                 df.plot()
                 plt.xticks(fontsize=7, rotation=20)
                 plt.savefig(BASE_DIR + "/gestionPacientes/static/img/grafico.png")
                 html = '{% extends "base.html" %}\n'
                 html += "{% load staticfiles i18n %}\n"
                 html += "{% block title %}Ver Grafico{% endblock title %}\n"
-                disenio += "{% block title %}Grafico{% endblock title %}\n"
                 html += "{% block content %}\n"
                 html += '<img class="plot" src="{{ figure }}"/>\n'
                 html += "{% endblock content %}"
 
                 with open('gestionPacientes/plantillas/grafico.html', 'w') as f:
                     f.write(html)
-                return render(request, 'grafico.html',{'figure': "../static/img/grafico.png"})
+                return render(request, 'grafico.html', {'figure': "../static/img/grafico.png"})
             except:
-                return render(request,'download.html',{'pacientes':pacientes,'fecha':fecha,'msg': "La tabla está vacía"})
-        return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha})
+                return render(request, 'download.html',{'pacientes': pacientes, 'fecha': fecha, 'msg': "La tabla está vacía"})
+        return render(request, 'download.html', {'pacientes': pacientes, 'fecha': fecha})
     except:
-        return render(request,'download.html',{'pacientes':pacientes, 'fecha':fecha,'msg': "Ha ocurrido un error"})
+        return render(request, 'download.html',{'pacientes': pacientes, 'fecha': fecha, 'msg': "Ha ocurrido un error"})
 
 
 
