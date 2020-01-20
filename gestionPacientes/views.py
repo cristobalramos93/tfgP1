@@ -869,6 +869,7 @@ def juntar_glu(r):
         r.Glucosa_total = np.nan
     return r
 
+#para poder hacer commit
 def fitbit(request,csv_file,usuario,tipo_archivo):
     #Esto lo tenemos que hacer ya que si intentamos leer varias veces el .csv se pierde la informacion por lo
     # que cuardamos una copia en local, al final del script se borra
