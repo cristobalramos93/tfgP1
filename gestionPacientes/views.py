@@ -248,7 +248,12 @@ def download(request):
                 file.write(disenio)
             return render(request,"table.html")
         elif 'descarga' in request.POST: #si es descargar
-            df.to_csv("final.csv")
+            separador = request.POST['separador']
+            if separador == "COMA":
+                df.to_csv("final.csv")
+            else:
+                df.to_csv("final.csv", sep = ";")
+
             with open('final.csv') as myfile:
                 response = HttpResponse(myfile, content_type='text/csv')
                 response['Content-Disposition'] = 'attachment; filename ='+ str(id_usuario) +'_'+ usuario + '.csv'
