@@ -39,6 +39,12 @@ def welcome(request):
     except:
         return redirect('/login')
 
+def administracion(request):
+    try:
+        return redirect('/admin')
+    except:
+        print('error')
+
 def new_password(request):
     try:
         template = 'new_password.html'
